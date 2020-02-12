@@ -205,8 +205,8 @@ function loadProgressHandler(loader, resource) {
 let roomWidth = ROOM_IMG_WIDTH;
 let roomHeight = ROOM_IMG_HEIGHT;
 
-let canvasX = window.innerWidth;
-let canvasY = window.innerHeight;
+let windowWidth = window.innerWidth;
+let windowHeight = window.innerHeight;
 
 let room,
   bg,
@@ -258,11 +258,11 @@ function setup() {
   room = new Container();
   room.x = 0;
   room.y = 0;
-  if (canvasX / canvasY > 16 / 9) {
-    roomWidth = 1.1 * canvasX;
+  if (windowWidth / windowHeight > 16 / 9) {
+    roomWidth = 1.1 * windowWidth;
     roomHeight = (9 * roomWidth) / 16;
   } else {
-    roomHeight = 1.1 * canvasY;
+    roomHeight = 1.1 * windowHeight;
     roomWidth = (16 * roomHeight) / 9;
   }
 
@@ -490,6 +490,7 @@ function setup() {
   slide1.on("mousedown", function() {
     if (!busy) {
       slide1drag = true;
+      //slide1 frame = next frame
     }
   });
 
@@ -557,22 +558,22 @@ function setup() {
 
   // gui = new Sprite(resources["img/aSimpleSquare.png"].texture);
   // gui = new Rectangle(
-  //   0.1 * canvasX,
-  //   0.1 * canvasY,
-  //   0.8 * canvasX,
-  //   0.8 * canvasY
+  //   0.1 * windowWidth,
+  //   0.1 * windowHeight,
+  //   0.8 * windowWidth,
+  //   0.8 * windowHeight
   // );
   gui = new Container();
-  gui.x = 0.1 * canvasX;
-  gui.y = 0.1 * canvasY;
-  // gui.width = 0.8 * canvasX;
-  // gui.height = 0.8 * canvasY;
+  gui.x = 0.1 * windowWidth;
+  gui.y = 0.1 * windowHeight;
+  // gui.width = 0.8 * windowWidth;
+  // gui.height = 0.8 * windowHeight;
   // gui.interactive = true;
   gui.visible = false;
 
   phone = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  phone.x = canvasX - 100 - phone.width;
-  phone.y = canvasY - 20 - phone.height;
+  phone.x = windowWidth - 100 - phone.width;
+  phone.y = windowHeight - 20 - phone.height;
   phone.interactive = true;
   phone.cursor = "pointer";
   phone.on("mousedown", function() {
@@ -584,9 +585,9 @@ function setup() {
 
   phoneGui = new Sprite(resources["img/phoneScreen.png"].texture);
   phoneGui.y = 30;
-  phoneGui.height = canvasY - 2 * phoneGui.y;
+  phoneGui.height = windowHeight - 2 * phoneGui.y;
   phoneGui.width = (9 * phoneGui.height) / 16;
-  phoneGui.x = canvasX * 0.5 - phoneGui.width / 2;
+  phoneGui.x = windowWidth * 0.5 - phoneGui.width / 2;
   phoneGui.visible = false;
   phoneGui.interactive = true;
 
@@ -632,37 +633,49 @@ function gameLoop(delta) {
     mousey = mouseEvent.global.y;
 
     if (!stopPan && mouseEvent.pointerType == "mouse") {
-      // The following math is based off the constraint: max |desiredx| must be > |roomWidth - canvasX|
-      // max |mousex| = canvasX, min |mousex| = 0
+      // let scalex = 2;
+      // let scaley = 1.4;
 
-      // control this to decide where to fully pan to left or right. Higher = pans to the edges quicker.
-      // Constant >= 2 or else it will not pan over the full image!
-      let panConstant = 2.5;
-      let panWidth = roomWidth - canvasX;
-      let panScaleX = panWidth / (canvasX / panConstant);
-      let desiredx = (canvasX / 2 - mousex) * panScaleX;
+      let offsetx = 200; // amount of pan area to cut off
+      let offsety = 200;
 
-      let panHeight = roomHeight - canvasY;
-      let panScaleY = panHeight / (canvasY / panConstant);
-      let desiredy = (canvasY / 2 - mousey) * panScaleY;
+      // 1. (attempt1)
+      // let desiredroomx = ((windowWidth - roomWidth) / windowWidth) * mousex; // if pan area has 1:1 ratio to window
+      // let desiredroomy = ((windowHeight - roomHeight) / windowHeight) * mousey; // if pan area has 1:1 ratio to window
 
-      if (desiredx < canvasX - roomWidth) {
-        desiredx = canvasX - roomWidth;
+      // 2. (attempt2)
+      // let centerx = windowWidth - mousex; // fine if pan area has a 1:1 ratio to window... but...
+      // let centery = windowHeight - mousey;
+
+      // 3. (attempt3)
+      let centerx =
+        ((windowWidth + 2 * offsetx) / -windowWidth) * mousex +
+        windowWidth +
+        offsetx;
+      let centery =
+        ((windowHeight + 2 * offsety) / -windowHeight) * mousey +
+        windowHeight +
+        offsety;
+
+      let desiredroomx = centerx - roomWidth / 2;
+      let desiredroomy = centery - roomHeight / 2;
+
+      // cut bounds
+      if (desiredroomx < windowWidth - roomWidth) {
+        desiredroomx = windowWidth - roomWidth;
       }
-      if (desiredy < canvasY - roomHeight) {
-        desiredy = canvasY - roomHeight;
+      if (desiredroomy < windowHeight - roomHeight) {
+        desiredroomy = windowHeight - roomHeight;
       }
-      if (desiredx > 0) {
-        desiredx = 0;
+      if (desiredroomx > 0) {
+        desiredroomx = 0;
       }
-      if (desiredy > 0) {
-        desiredy = 0;
+      if (desiredroomy > 0) {
+        desiredroomy = 0;
       }
 
-      let smoothx = (1 - smoothSpeed) * room.x + smoothSpeed * desiredx;
-      // smoothx = (1 - smoothSpeed) * smoothx + smoothSpeed * desiredx;
-      let smoothy = (1 - smoothSpeed) * room.y + smoothSpeed * desiredy;
-      // smoothy = (1 - smoothSpeed) * smoothy + smoothSpeed * desiredy;
+      let smoothx = (1 - smoothSpeed) * room.x + smoothSpeed * desiredroomx;
+      let smoothy = (1 - smoothSpeed) * room.y + smoothSpeed * desiredroomy;
       room.x = smoothx;
       room.y = smoothy;
     }
@@ -696,27 +709,28 @@ function gameLoop(delta) {
 
 function resize() {
   // get new window size
-  canvasX = window.innerWidth;
-  canvasY = window.innerHeight;
+  windowWidth = window.innerWidth;
+  windowHeight = window.innerHeight;
 
   // scale room (bg, etc) to size
-  if (canvasX / canvasY > 16 / 9) {
-    roomWidth = 1.1 * canvasX;
+  if (windowWidth / windowHeight > 16 / 9) {
+    roomWidth = 1.1 * windowWidth;
     roomHeight = (9 * roomWidth) / 16;
   } else {
-    roomHeight = 1.1 * canvasY;
+    roomHeight = 1.1 * windowHeight;
     roomWidth = (16 * roomHeight) / 9;
   }
+
   room.width = roomWidth;
   room.height = roomHeight;
 
-  app.renderer.resize(canvasX, canvasY);
+  app.renderer.resize(windowWidth, windowHeight);
 
-  if (room.x < canvasX - roomWidth) {
-    room.x = canvasX - roomWidth;
+  if (room.x < windowWidth - roomWidth) {
+    room.x = windowWidth - roomWidth;
   }
-  if (room.y < canvasY - roomHeight) {
-    room.y = canvasY - roomHeight;
+  if (room.y < windowHeight - roomHeight) {
+    room.y = windowHeight - roomHeight;
   }
   if (room.x > 0) {
     room.x = 0;
@@ -725,18 +739,18 @@ function resize() {
     room.y = 0;
   }
 
-  gui.x = 0.1 * canvasX;
-  gui.y = 0.1 * canvasY;
-  gui.width = 0.8 * canvasX;
-  gui.height = 0.8 * canvasY;
+  gui.x = 0.1 * windowWidth;
+  gui.y = 0.1 * windowHeight;
+  gui.width = 0.8 * windowWidth;
+  gui.height = 0.8 * windowHeight;
 
-  phone.x = canvasX - 100;
-  phone.y = canvasY - 100;
+  phone.x = windowWidth - 100;
+  phone.y = windowHeight - 100;
 
   phoneGui.y = 30;
-  phoneGui.height = canvasY - 2 * phoneGui.y;
+  phoneGui.height = windowHeight - 2 * phoneGui.y;
   phoneGui.width = (9 * phoneGui.height) / 16;
-  phoneGui.x = canvasX * 0.5 - phoneGui.width / 2;
+  phoneGui.x = windowWidth * 0.5 - phoneGui.width / 2;
 }
 
 function stageMouseDown(event) {
@@ -770,6 +784,7 @@ function stageMouseUp() {
   slide1drag = false;
   slide1.x = 496;
   slide1.y = 736;
+  //slide1 frame = default
 
   slide2drag = false;
   slide2.x = 608;
@@ -804,7 +819,7 @@ function stageMouseUp() {
 }
 
 function openGui(type) {
-  // Graphics.drawRect(0.1 * canvasX, 0.1 * canvasY, 0.8 * canvasX, 0.8 * canvasY);
+  // Graphics.drawRect(0.1 * windowWidth, 0.1 * windowHeight, 0.8 * windowWidth, 0.8 * windowHeight);
   let textStyle = {
     fontFamily: "Source Sans Pro",
     fontSize: 18,
@@ -820,8 +835,8 @@ function openGui(type) {
         resources["json/text.json"].data["tdman"]["gui"],
         textStyle
       );
-      // text.x = 0.1 * canvasX;
-      // text.y = 0.1 * canvasY;
+      // text.x = 0.1 * windowWidth;
+      // text.y = 0.1 * windowHeight;
       gui.addChild(texttdman);
       break;
     case "mb":
@@ -842,20 +857,20 @@ function openGui(type) {
         resources["json/text.json"].data["witch"]["gui"],
         textStyle
       );
-      // text.x = 0.1 * canvasX;
-      // text.y = 0.1 * canvasY;
+      // text.x = 0.1 * windowWidth;
+      // text.y = 0.1 * windowHeight;
       gui.addChild(text);
       break;
     case "me":
       let me = new Sprite(resources["img/stereogram.jpg"].texture);
-      me.width = 0.8 * canvasX;
-      me.height = 0.8 * canvasY;
+      me.width = 0.8 * windowWidth;
+      me.height = 0.8 * windowHeight;
       gui.addChild(me);
       break;
     case "cp":
       let cp = new Sprite(resources["img/cardprinter.png"].texture);
-      cp.width = canvasX * 0.8; // TODO
-      cp.height = canvasY * 0.8;
+      cp.width = windowWidth * 0.8; // TODO
+      cp.height = windowHeight * 0.8;
 
       // add all buttons
       let buttonMargin = 20;
@@ -950,6 +965,7 @@ function validateInput(type, input) {
 function printCard(row, col) {
   console.log("printing");
   busy = true;
+  room.removeChild(card);
   closeGui();
   // play animation
   setTimeout(function() {
