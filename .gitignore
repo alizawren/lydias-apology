@@ -2,6 +2,7 @@
 img/
 json/
 sound/
+server/
 pixi.min.js
 pixi-sound.js
 jquery-3.4.1.min.js
