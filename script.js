@@ -241,7 +241,6 @@ let slide3drag = false;
 let carddrag = false;
 let lightOn = false;
 let lightIndex = 0;
-let transmute = false; // TODO: in the future, use a boolean on the server to avoid console variable manipulation
 let busy = false;
 let stopPan = false;
 
@@ -616,6 +615,27 @@ function setup() {
   app.stage.interactive = true;
   app.stage.on("mouseup", stageMouseUp);
 
+  // now some server calls to set things up
+  $.ajax("server/td.php", {
+    contentType: "application/json",
+    dataType: "json",
+    success: function(data, status, xhr) {
+      if (data.flag === "true") {
+        td.cursor = "pointer";
+        if (data.realm.length > 0) {
+          td.on("mousedown", function() {
+            if (!busy) {
+              window.open(data.realm);
+            }
+          });
+        }
+      }
+    },
+    error: function(xhr, errortype, exception) {
+      console.log("REQUEST UTTERLY FAILED!", errortype, exception);
+    }
+  });
+
   app.ticker.add(delta => gameLoop(delta));
 }
 
@@ -795,21 +815,41 @@ function stageMouseUp() {
   slide3.y = 784;
 
   if (carddrag) {
-    // in the future, make a server call to see if this action is permitted to avoid variable tampering in the console!
-    // TODO: BOUNDS CHECK!! very importnat lol
-    if (transmute) {
-      carddrag = false;
-      // play a lil animation
-      setTimeout(function() {
-        // open a webpage related to the card dragged in
-        // window.location.href = "http://alizawren.com";
-        card.visible = false;
-        td.on("mousedown", function() {
-          if (!busy) {
-            window.open("http://alizawren.com");
+    let withinBounds =
+      card.x < td.x + td.width &&
+      card.x + card.width > td.x &&
+      card.y < td.y + td.height &&
+      card.y + card.height > td.y;
+    if (withinBounds) {
+      $.ajax("server/td.php", {
+        contentType: "application/json",
+        data: { row: card.row, col: card.col },
+        dataType: "json",
+        success: function(data, status, xhr) {
+          console.log("getting data", data);
+          if (data.flag === "true") {
+            carddrag = false;
+            // play a lil animation
+            setTimeout(function() {
+              card.visible = false;
+              td.off("mousedown");
+              td.on("mousedown", function() {
+                if (!busy) {
+                  // open a webpage related to the card dragged in
+                  window.open(data.realm);
+                }
+              });
+            }, 2000);
+          } else {
+            carddrag = false;
+            card.x = 1760;
+            card.y = 800;
           }
-        });
-      }, 2000);
+        },
+        error: function(xhr, errortype, exception) {
+          console.log("REQUEST UTTERLY FAILED!", errortype, exception);
+        }
+      });
     } else {
       carddrag = false;
       card.x = 1760;
@@ -916,20 +956,25 @@ function validateInput(type, input) {
   switch (type) {
     case "td":
       closeGui();
-      if (input == "code") {
-        // "code" is currently the secret code!
-        console.log("you got it!");
-
-        // play a lil animation
-        setTimeout(function() {
-          transmute = true;
-          td.cursor = "pointer"; // allow access to transmuter
-          busy = false;
-        });
-      } else {
-        console.log("wrong answer");
-        busy = false;
-      }
+      $.ajax("server/td.php", {
+        data: { input: input },
+        contentType: "application/json",
+        dataType: "json",
+        success: function(data, status, xhr) {
+          console.log("transmuted to php!", data);
+          if (data.flag === "true") {
+            setTimeout(function() {
+              td.cursor = "pointer";
+              busy = false;
+            }, 1000);
+          } else {
+            busy = false;
+          }
+        },
+        error: function(xhr, errortype, exception) {
+          console.log("REQUEST UTTERLY FAILED!", errortype, exception);
+        }
+      });
       break;
     case "mb1":
       if (input == "1") {
@@ -964,6 +1009,7 @@ function validateInput(type, input) {
 
 function printCard(row, col) {
   console.log("printing");
+  // TODO: MAKE A SERVER CALL, STORE CARD.
   busy = true;
   room.removeChild(card);
   closeGui();
@@ -971,6 +1017,8 @@ function printCard(row, col) {
   setTimeout(function() {
     // add a card to scene
     card = new Sprite(resources["img/aSimpleSquare.png"].texture);
+    card.row = row;
+    card.col = col;
     card.x = 1760;
     card.y = 800;
     card.width = 20;
@@ -986,7 +1034,6 @@ function printCard(row, col) {
     busy = false;
   }, 2000);
 }
-
 function changeLight() {
   if (lightOn) {
     if (lightIndex == 0) {
