@@ -161,6 +161,8 @@ let app = new Application({
   interactive: true
 });
 
+createjs.Ticker.timingMode = createjs.Ticker.RAF;
+
 app.renderer.view.style.position = "absolute";
 app.renderer.view.style.display = "block";
 app.renderer.autoDensity = true;
@@ -376,8 +378,6 @@ function setup() {
     }
   });
 
-  // tube1 = new Sprite(resources["img/aSimpleSquare.png"].texture);
-
   tube1 = new AnimatedSprite(tube1texture);
   tube1.x = 208;
   tube1.y = 704;
@@ -572,21 +572,45 @@ function setup() {
 
   phone = new Sprite(resources["img/aSimpleSquare.png"].texture);
   phone.x = windowWidth - 100 - phone.width;
-  phone.y = windowHeight - 20 - phone.height;
+  phone.y = windowHeight - 40 - phone.height;
   phone.interactive = true;
   phone.cursor = "pointer";
   phone.on("mousedown", function() {
-    if (!busy) {
+    if (!busy && !phoneGui.visible) {
       phoneGui.visible = true;
+      phoneGui.x = phone.x;
+      phoneGui.y = phone.y;
+      phoneGui.height = 1;
+      phoneGui.width = 1;
+      phoneGui.alpha = 0;
+
+      let finalX = 0.6 * windowWidth;
+      let finalY = 80;
+      let finalHeight = windowHeight - 2 * finalY;
+      let finalWidth = (9 * finalHeight) / 16;
+
+      createjs.Tween.get(phoneGui)
+        .to(
+          {
+            x: finalX,
+            y: finalY,
+            width: finalWidth,
+            height: finalHeight,
+            alpha: 1
+          },
+          200,
+          createjs.Ease.quadInOut()
+        )
+        .call(function() {});
       stopPan = true;
     }
   });
 
   phoneGui = new Sprite(resources["img/phoneScreen.png"].texture);
-  phoneGui.y = 30;
-  phoneGui.height = windowHeight - 2 * phoneGui.y;
-  phoneGui.width = (9 * phoneGui.height) / 16;
-  phoneGui.x = windowWidth * 0.5 - phoneGui.width / 2;
+  phoneGui.x = phone.x;
+  phoneGui.y = phone.y;
+  phoneGui.height = 1;
+  phoneGui.width = 1;
   phoneGui.visible = false;
   phoneGui.interactive = true;
 
@@ -656,8 +680,8 @@ function gameLoop(delta) {
       // let scalex = 2;
       // let scaley = 1.4;
 
-      let offsetx = 200; // amount of pan area to cut off
-      let offsety = 200;
+      let offsetx = 100; // amount of pan area to cut off
+      let offsety = 100;
 
       // 1. (attempt1)
       // let desiredroomx = ((windowWidth - roomWidth) / windowWidth) * mousex; // if pan area has 1:1 ratio to window
@@ -764,13 +788,13 @@ function resize() {
   gui.width = 0.8 * windowWidth;
   gui.height = 0.8 * windowHeight;
 
-  phone.x = windowWidth - 100;
-  phone.y = windowHeight - 100;
+  phone.x = windowWidth - 100 - phone.width;
+  phone.y = windowHeight - 40 - phone.height;
 
-  phoneGui.y = 30;
+  phoneGui.y = 80;
   phoneGui.height = windowHeight - 2 * phoneGui.y;
   phoneGui.width = (9 * phoneGui.height) / 16;
-  phoneGui.x = windowWidth * 0.5 - phoneGui.width / 2;
+  phoneGui.x = 0.6 * windowWidth;
 }
 
 function stageMouseDown(event) {
@@ -794,9 +818,7 @@ function stageMouseDown(event) {
       mousey < phoneGui.y ||
       mousey > phoneGui.y + phoneGui.height)
   ) {
-    phoneGui.visible = false;
-    stopPan = false;
-    app.stage.off("mousedown");
+    closePhone();
   }
 }
 
@@ -947,6 +969,31 @@ function closeGui() {
     inputs[i].value = "";
     inputs[i].style.display = "none";
   }
+}
+
+function closePhone() {
+  let finalX = phone.x;
+  let finalY = phone.y;
+  let finalHeight = 1;
+  let finalWidth = 1;
+
+  createjs.Tween.get(phoneGui)
+    .to(
+      {
+        x: finalX,
+        y: finalY,
+        width: finalWidth,
+        height: finalHeight,
+        alpha: 0
+      },
+      200,
+      createjs.Ease.quadInOut()
+    )
+    .call(function() {
+      phoneGui.visible = false;
+      stopPan = false;
+      app.stage.off("mousedown");
+    });
 }
 
 function validateInput(type, input) {

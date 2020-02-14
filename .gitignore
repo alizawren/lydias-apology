@@ -5,5 +5,7 @@ sound/
 server/
 pixi.min.js
 pixi-sound.js
+tweenjs.min.js
 jquery-3.4.1.min.js
 favicon.ico
+node_modules
