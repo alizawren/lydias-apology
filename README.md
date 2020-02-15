@@ -2,4 +2,6 @@ Welcome friend. Not everything is as it seems.
 
 ![A room with various objects](/preview.png)
 
-Note to self: clean up memory leaks
+See my work in progress here -> https://www.alizawren.com/room/index.html
+
+Note to self: clean up memory leaks/optimize
