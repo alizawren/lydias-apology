@@ -116,6 +116,18 @@ mb4Input.addEventListener("keypress", function(event) {
 });
 document.body.appendChild(mb4Input);
 
+let convoHolder = document.createElement("div");
+convoHolder.classList.add("convo");
+convoHolder.style.background = "#fff";
+convoHolder.style.position = "absolute";
+convoHolder.style.display = "none";
+convoHolder.style.zIndex = 100;
+convoHolder.style.padding = "10px";
+convoHolder.style.flexDirection = "column";
+convoHolder.style.alignItems = "stretch";
+convoHolder.style.overflowY = "scroll";
+document.body.appendChild(convoHolder);
+
 ////////////////////////////
 
 // Constants
@@ -124,6 +136,8 @@ const ROOM_IMG_HEIGHT = 1440;
 
 const PHONE_SCREEN_WIDTH = 1080;
 const PHONE_SCREEN_HEIGHT = 1920;
+
+const PHONE_SPEED = 250;
 
 ////////////////////////////
 
@@ -137,7 +151,7 @@ PIXI.utils.sayHello(
   "Welcome friend! Not everything is as it seems. You are rendering: " + type
 );
 console.log(
-  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, ↑"
+  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, 👁"
 );
 
 //Aliases
@@ -185,6 +199,7 @@ loader
   .add("img/stereogram.jpg")
   // text
   .add("json/text.json")
+  .add("json/convos.json")
   // sound
   .add("sound/streets.mp3")
   .on("progress", loadProgressHandler)
@@ -269,7 +284,12 @@ function setup() {
 
   bg = new Sprite(resources["img/room.png"].texture);
 
-  td = new Sprite(resources["img/aSimpleSquare.png"].texture);
+  let tube1texture = [
+    resources["img/aSimpleSquare.png"].texture,
+    resources["img/redSquare.png"].texture
+  ];
+  // td = new Sprite(resources["img/aSimpleSquare.png"].texture);
+  td = new AnimatedSprite(tube1texture);
   td.x = 1312;
   td.y = 416;
   td.interactive = true;
@@ -363,10 +383,6 @@ function setup() {
       openGui("cb");
     }
   });
-  let tube1texture = [
-    resources["img/aSimpleSquare.png"].texture,
-    resources["img/redSquare.png"].texture
-  ];
   box = new AnimatedSprite(tube1texture);
   box.x = 1360;
   box.y = 960;
@@ -576,34 +592,7 @@ function setup() {
   phone.interactive = true;
   phone.cursor = "pointer";
   phone.on("mousedown", function() {
-    if (!busy && !phoneGui.visible) {
-      phoneGui.visible = true;
-      phoneGui.x = phone.x;
-      phoneGui.y = phone.y;
-      phoneGui.height = 1;
-      phoneGui.width = 1;
-      phoneGui.alpha = 0;
-
-      let finalX = 0.6 * windowWidth;
-      let finalY = 80;
-      let finalHeight = windowHeight - 2 * finalY;
-      let finalWidth = (9 * finalHeight) / 16;
-
-      createjs.Tween.get(phoneGui)
-        .to(
-          {
-            x: finalX,
-            y: finalY,
-            width: finalWidth,
-            height: finalHeight,
-            alpha: 1
-          },
-          200,
-          createjs.Ease.quadInOut()
-        )
-        .call(function() {});
-      stopPan = true;
-    }
+    openPhone();
   });
 
   phoneGui = new Sprite(resources["img/phoneScreen.png"].texture);
@@ -646,6 +635,7 @@ function setup() {
     success: function(data, status, xhr) {
       if (data.flag === "true") {
         td.cursor = "pointer";
+        td.gotoAndStop(1);
         if (data.realm.length > 0) {
           td.on("mousedown", function() {
             if (!busy) {
@@ -654,9 +644,18 @@ function setup() {
           });
         }
       }
+
+      currConvoId = data.convoid;
+      currMsgIndex = parseInt(data.lastMsgIndex) + 1;
+      let convo = resources["json/convos.json"].data[currConvoId];
+      if (data.convoid === "") {
+        openPhone("begin");
+      } else if (data.lastMsgIndex < convo.length - 1) {
+        openPhone();
+      }
     },
     error: function(xhr, errortype, exception) {
-      console.log("REQUEST UTTERLY FAILED!", errortype, exception);
+      console.error("REQUEST UTTERLY FAILED!", errortype, exception);
     }
   });
 
@@ -667,7 +666,8 @@ function gameLoop(delta) {
   let mousex;
   let mousey;
 
-  if (gui.visible || phoneGui.visible) {
+  if (gui.visible) {
+    // must add listener here and not in openGui or else gui closes immediately
     app.stage.on("mousedown", stageMouseDown);
   }
   const smoothSpeed = 0.06;
@@ -791,10 +791,15 @@ function resize() {
   phone.x = windowWidth - 100 - phone.width;
   phone.y = windowHeight - 40 - phone.height;
 
-  phoneGui.y = 80;
+  phoneGui.y = 40;
   phoneGui.height = windowHeight - 2 * phoneGui.y;
   phoneGui.width = (9 * phoneGui.height) / 16;
   phoneGui.x = 0.6 * windowWidth;
+
+  convoHolder.style.left = `${phoneGui.x + 10}px`;
+  convoHolder.style.top = `${phoneGui.y + 0.4 * phoneGui.height}px`;
+  convoHolder.style.width = `${phoneGui.width - 20}px`;
+  convoHolder.style.height = `${0.45 * phoneGui.height}px`;
 }
 
 function stageMouseDown(event) {
@@ -848,7 +853,6 @@ function stageMouseUp() {
         data: { row: card.row, col: card.col },
         dataType: "json",
         success: function(data, status, xhr) {
-          console.log("getting data", data);
           if (data.flag === "true") {
             carddrag = false;
             // play a lil animation
@@ -869,7 +873,7 @@ function stageMouseUp() {
           }
         },
         error: function(xhr, errortype, exception) {
-          console.log("REQUEST UTTERLY FAILED!", errortype, exception);
+          console.error("REQUEST UTTERLY FAILED!", errortype, exception);
         }
       });
     } else {
@@ -951,11 +955,44 @@ function openGui(type) {
           cp.addChild(button);
         }
       }
-
       gui.addChild(cp);
   }
   gui.visible = true;
   stopPan = true;
+}
+
+function openPhone(convoid) {
+  if (!busy && !phoneGui.visible) {
+    busy = true;
+    phoneGui.visible = true;
+    phoneGui.x = phone.x;
+    phoneGui.y = phone.y;
+    phoneGui.height = 1;
+    phoneGui.width = 1;
+    phoneGui.alpha = 0;
+
+    let finalX = 0.6 * windowWidth;
+    let finalY = 40;
+    let finalHeight = windowHeight - 2 * finalY;
+    let finalWidth = (9 * finalHeight) / 16;
+
+    createjs.Tween.get(phoneGui)
+      .to(
+        {
+          x: finalX,
+          y: finalY,
+          width: finalWidth,
+          height: finalHeight,
+          alpha: 1
+        },
+        PHONE_SPEED,
+        createjs.Ease.quadInOut()
+      )
+      .call(function() {
+        playConversation(convoid);
+      });
+    stopPan = true;
+  }
 }
 
 function closeGui() {
@@ -972,6 +1009,11 @@ function closeGui() {
 }
 
 function closePhone() {
+  convoHolder.style.display = "none";
+  while (convoHolder.firstChild) {
+    convoHolder.removeChild(convoHolder.firstChild);
+  }
+
   let finalX = phone.x;
   let finalY = phone.y;
   let finalHeight = 1;
@@ -986,13 +1028,14 @@ function closePhone() {
         height: finalHeight,
         alpha: 0
       },
-      200,
+      PHONE_SPEED,
       createjs.Ease.quadInOut()
     )
     .call(function() {
       phoneGui.visible = false;
       stopPan = false;
       app.stage.off("mousedown");
+      busy = false;
     });
 }
 
@@ -1008,10 +1051,10 @@ function validateInput(type, input) {
         contentType: "application/json",
         dataType: "json",
         success: function(data, status, xhr) {
-          console.log("transmuted to php!", data);
           if (data.flag === "true") {
             setTimeout(function() {
               td.cursor = "pointer";
+              td.gotoAndStop(1);
               busy = false;
             }, 1000);
           } else {
@@ -1019,7 +1062,7 @@ function validateInput(type, input) {
           }
         },
         error: function(xhr, errortype, exception) {
-          console.log("REQUEST UTTERLY FAILED!", errortype, exception);
+          console.error("REQUEST UTTERLY FAILED!", errortype, exception);
         }
       });
       break;
@@ -1055,7 +1098,6 @@ function validateInput(type, input) {
 }
 
 function printCard(row, col) {
-  console.log("printing");
   // TODO: MAKE A SERVER CALL, STORE CARD.
   busy = true;
   room.removeChild(card);
@@ -1081,6 +1123,7 @@ function printCard(row, col) {
     busy = false;
   }, 2000);
 }
+
 function changeLight() {
   if (lightOn) {
     if (lightIndex == 0) {
@@ -1101,4 +1144,137 @@ function changeLight() {
     card2.gotoAndStop(0);
     card3.gotoAndStop(0);
   }
+}
+
+let currMsgIndex;
+let currConvoId;
+
+function playConversation(newConvoId) {
+  convoHolder.style.left = `${phoneGui.x + 0.02 * phoneGui.width}px`;
+  convoHolder.style.top = `${phoneGui.y + 0.4 * phoneGui.height}px`;
+  convoHolder.style.width = `${0.9 * phoneGui.width}px`;
+  convoHolder.style.height = `${0.45 * phoneGui.height}px`;
+  convoHolder.style.display = "flex";
+
+  if (typeof convoHolder.onselectstart != "undefined") {
+    convoHolder.onselectstart = function() {
+      return false;
+    };
+  } else if (typeof convoHolder.style.MozUserSelect != "undefined") {
+    convoHolder.style.MozUserSelect = "none";
+  } else {
+    convoHolder.onmousedown = function() {
+      return false;
+    };
+  }
+
+  if (!newConvoId) {
+    // make ajax request for info...
+    $.ajax("server/td.php", {
+      contentType: "application/json",
+      dataType: "json",
+      success: function(data, status, xhr) {
+        currMsgIndex = parseInt(data.lastMsgIndex) + 1;
+        addLastMessages(data.convoid, data.lastMsgIndex);
+        currConvoId = data.convoid;
+        let convo = resources["json/convos.json"].data[currConvoId];
+        if (currMsgIndex < convo.length) {
+          app.stage.on("mousedown", addNextMessage);
+          convoHolder.addEventListener("click", addNextMessage);
+        } else {
+          app.stage.on("mousedown", stageMouseDown);
+        }
+      },
+      error: function(xhr, errortype, exception) {
+        console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+      }
+    });
+  } else {
+    // we're starting a new convo.
+    currConvoId = newConvoId;
+    currMsgIndex = 0;
+    app.stage.on("mousedown", addNextMessage);
+    convoHolder.addEventListener("click", addNextMessage);
+    addNextMessage();
+  }
+}
+
+function addNextMessage() {
+  let convo = resources["json/convos.json"].data[currConvoId];
+  let msg = convo[currMsgIndex];
+  addMessageUi(msg);
+  convoHolder.scrollTo(0, convoHolder.scrollHeight);
+
+  $.ajax("server/td.php", {
+    contentType: "application/json",
+    data: { convoid: currConvoId, lastMsgIndex: currMsgIndex },
+    dataType: "json",
+    success: function(data, status, xhr) {},
+    error: function(xhr, errortype, exception) {
+      console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+    }
+  });
+
+  currMsgIndex++;
+
+  if (currMsgIndex >= convo.length) {
+    app.stage.off("mousedown");
+    app.stage.on("mousedown", stageMouseDown);
+    convoHolder.removeEventListener("click", addNextMessage);
+    return;
+  }
+}
+
+// note: this function should not make server calls or modify any data!
+function addLastMessages(convoid, lastMsgIndex) {
+  let convo = resources["json/convos.json"].data[convoid];
+  if (!convo) {
+    return;
+  }
+
+  let index = 0;
+  while (index <= lastMsgIndex && index < convo.length) {
+    let msg = convo[index];
+    addMessageUi(msg);
+    index++;
+  }
+  convoHolder.scrollTo(0, convoHolder.scrollHeight);
+}
+
+// msg is an object with char and text fields
+function addMessageUi(msg) {
+  let char = msg["char"];
+  let msgText = msg["text"];
+
+  // create message bubble
+  let msgContainer = document.createElement("div"); // wrapper
+  msgContainer.classList.add("msg-container");
+  msgContainer.style.width = "100%";
+  msgContainer.style.display = "flex";
+  let msgIcon = document.createElement("img");
+  msgIcon.style.borderRadius = "50%";
+  msgIcon.style.width = "30px";
+  msgIcon.style.height = "30px";
+
+  let msgBubble = document.createElement("div");
+  msgBubble.classList.add("msg-bubble");
+  msgBubble.style.padding = "5px";
+  msgBubble.style.borderRadius = "5px";
+  msgBubble.style.margin = "5px";
+  msgBubble.style.maxWidth = `${0.5 * phoneGui.width}px`;
+  msgBubble.innerText = msgText;
+  if (char === "xxx") {
+    msgContainer.style.justifyContent = "flex-start";
+    msgBubble.style.background = "#f1f0f0";
+    msgIcon.src = "img/redSquare.png";
+    msgContainer.appendChild(msgIcon);
+    msgContainer.appendChild(msgBubble);
+  } else if (char === "wren") {
+    msgContainer.style.justifyContent = "flex-end";
+    msgBubble.style.background = "#dbdfff";
+    msgIcon.src = "img/aSimpleSquare.png";
+    msgContainer.appendChild(msgBubble);
+    msgContainer.appendChild(msgIcon);
+  }
+  convoHolder.appendChild(msgContainer);
 }

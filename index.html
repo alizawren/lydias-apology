@@ -1,27 +1,60 @@
 <!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Hello World</title>
-    <link rel="shortcut icon" href="favicon.ico" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="shortcut icon" href="favicon.ico"/>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro|Raleway&display=swap" rel="stylesheet"/>
   </head>
   <style>
     * {
       padding: 0;
       margin: 0;
     }
+
+    .convo {
+      font-family: 'Raleway', sans-serif;
+      font-size: '4em';
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    @keyframes msgAnim {
+      0% {
+        opacity: 0;
+        transform: translateY(5%);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0%);
+      }
+    }
+
+    .msg-container {
+      animation: 0.2s ease-out 0s 1 msgAnim;
+    }
+
+    /* .convo::-webkit-scrollbar {
+      display: none;
+    }
+
+    .convo {
+      -ms-overflow-style: none;
+    } */
   </style>
   <script src="jquery-3.4.1.min.js"></script>
   <script src="pixi.min.js"></script>
   <script src="pixi-sound.js"></script>
   <script src="tweenjs.min.js"></script>
-  <!-- <script src="tween.umd.js"></script> -->
 
   <body>
     <script src="script.js"></script>
+
   </body>
+
 </html>
