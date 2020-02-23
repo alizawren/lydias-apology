@@ -1,4 +1,4 @@
-Welcome friend. Not everything is as it seems.
+Welcome. Not everything is as it seems.
 
 ![A room with various objects](/preview.png)
 ![A room with various objects](/preview2.png)
