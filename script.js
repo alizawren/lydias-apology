@@ -148,10 +148,10 @@ if (!PIXI.utils.isWebGLSupported()) {
 
 // get rid of audio context warnings
 PIXI.utils.sayHello(
-  "Welcome friend! Not everything is as it seems. You are rendering: " + type
+  "Welcome! Not everything is as it seems. You are rendering: " + type
 );
 console.log(
-  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, 👁"
+  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, ♅"
 );
 
 //Aliases
@@ -195,8 +195,49 @@ loader
   .add("img/redSquare.png")
   .add("img/greenSquare.png")
   .add("img/phoneScreen.png")
+  .add("img/wren.png")
   .add("img/cardprinter.png")
-  .add("img/stereogram.jpg")
+  .add("img/cardprinter1.png")
+  .add("img/cardprinter2.png")
+  .add("img/cardprinter3.png")
+  // .add("img/stereogram.jpg")
+  .add("img/magic eye.png")
+  .add("img/cpb.png")
+  .add("img/cpbpressed.png")
+  .add("img/boxopen.png")
+  .add("img/boxclose.png")
+  .add("img/tdman.png")
+  .add("img/tube11.png")
+  .add("img/tube12.png")
+  .add("img/tube13.png")
+  .add("img/tube14.png")
+  .add("img/tube21.png")
+  .add("img/tube22.png")
+  .add("img/tube23.png")
+  .add("img/tube24.png")
+  .add("img/tube31.png")
+  .add("img/tube32.png")
+  .add("img/tube33.png")
+  .add("img/tube34.png")
+  .add("img/tube41.png")
+  .add("img/tube42.png")
+  .add("img/tube43.png")
+  .add("img/tube44.png")
+  .add("img/word11.png")
+  .add("img/word12.png")
+  .add("img/word21.png")
+  .add("img/word22.png")
+  .add("img/word31.png")
+  .add("img/word32.png")
+  .add("img/lamp1off.png")
+  .add("img/lamp1on.png")
+  .add("img/lamp2off.png")
+  .add("img/lamp2on.png")
+  .add("img/lamp3off.png")
+  .add("img/lamp3on.png")
+  .add("img/lampoffbutton.png")
+  .add("img/lamponbutton.png")
+  .add("img/witch.png")
   // text
   .add("json/text.json")
   .add("json/convos.json")
@@ -250,6 +291,7 @@ let room,
   slide3,
   magiceye,
   card;
+let chosenCards = [];
 let gui, phone, phoneGui, settingsButton;
 let bgm;
 let slide1drag = false;
@@ -284,12 +326,12 @@ function setup() {
 
   bg = new Sprite(resources["img/room.png"].texture);
 
-  let tube1texture = [
+  let temptexture = [
     resources["img/aSimpleSquare.png"].texture,
     resources["img/redSquare.png"].texture
   ];
   // td = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  td = new AnimatedSprite(tube1texture);
+  td = new AnimatedSprite(temptexture);
   td.x = 1312;
   td.y = 416;
   td.interactive = true;
@@ -383,9 +425,14 @@ function setup() {
       openGui("cb");
     }
   });
-  box = new AnimatedSprite(tube1texture);
-  box.x = 1360;
-  box.y = 960;
+
+  const boxTexture = [
+    resources["img/boxclose.png"].texture,
+    resources["img/boxopen.png"].texture
+  ];
+  box = new AnimatedSprite(boxTexture);
+  box.x = 1182;
+  box.y = 930;
   box.interactive = true;
   box.cursor = "pointer";
   box.on("mousedown", function() {
@@ -394,44 +441,76 @@ function setup() {
     }
   });
 
+  const tube1texture = [
+    resources["img/tube11.png"].texture,
+    resources["img/tube12.png"].texture,
+    resources["img/tube13.png"].texture,
+    resources["img/tube14.png"].texture
+  ];
+
   tube1 = new AnimatedSprite(tube1texture);
-  tube1.x = 208;
-  tube1.y = 704;
+  tube1.x = 216;
+  tube1.y = 598;
   tube1.interactive = true;
   tube1.cursor = "pointer";
+  tube1.gotoAndStop(Math.floor(Math.random() * 4));
   tube1.on("mousedown", function() {
     if (!busy) {
       tube1.gotoAndStop((tube1.currentFrame + 1) % tube1.totalFrames);
     }
   });
 
-  tube2 = new AnimatedSprite(tube1texture);
-  tube2.x = 256;
-  tube2.y = 704;
+  const tube2texture = [
+    resources["img/tube21.png"].texture,
+    resources["img/tube22.png"].texture,
+    resources["img/tube23.png"].texture,
+    resources["img/tube24.png"].texture
+  ];
+
+  tube2 = new AnimatedSprite(tube2texture);
+  tube2.x = 260;
+  tube2.y = 600;
   tube2.interactive = true;
   tube2.cursor = "pointer";
+  tube2.gotoAndStop(Math.floor(Math.random() * 4));
   tube2.on("mousedown", function() {
     if (!busy) {
       tube2.gotoAndStop((tube2.currentFrame + 1) % tube2.totalFrames);
     }
   });
 
-  tube3 = new AnimatedSprite(tube1texture);
+  const tube3texture = [
+    resources["img/tube31.png"].texture,
+    resources["img/tube32.png"].texture,
+    resources["img/tube33.png"].texture,
+    resources["img/tube34.png"].texture
+  ];
+
+  tube3 = new AnimatedSprite(tube3texture);
   tube3.x = 304;
-  tube3.y = 704;
+  tube3.y = 602;
   tube3.interactive = true;
   tube3.cursor = "pointer";
+  tube3.gotoAndStop(Math.floor(Math.random() * 4));
   tube3.on("mousedown", function() {
     if (!busy) {
       tube3.gotoAndStop((tube3.currentFrame + 1) % tube3.totalFrames);
     }
   });
 
-  tube4 = new AnimatedSprite(tube1texture);
-  tube4.x = 352;
-  tube4.y = 704;
+  const tube4texture = [
+    resources["img/tube41.png"].texture,
+    resources["img/tube42.png"].texture,
+    resources["img/tube43.png"].texture,
+    resources["img/tube44.png"].texture
+  ];
+
+  tube4 = new AnimatedSprite(tube4texture);
+  tube4.x = 348;
+  tube4.y = 604;
   tube4.interactive = true;
   tube4.cursor = "pointer";
+  tube4.gotoAndStop(Math.floor(Math.random() * 4));
   tube4.on("mousedown", function() {
     if (!busy) {
       tube4.gotoAndStop((tube4.currentFrame + 1) % tube4.totalFrames);
@@ -449,53 +528,78 @@ function setup() {
     }
   });
 
-  let lighttexture = [
-    resources["img/aSimpleSquare.png"].texture,
-    resources["img/redSquare.png"].texture,
-    resources["img/greenSquare.png"].texture
+  const lighttexture = [
+    resources["img/lamp1off.png"].texture,
+    resources["img/lamp2off.png"].texture,
+    resources["img/lamp3off.png"].texture,
+    resources["img/lamp1on.png"].texture,
+    resources["img/lamp2on.png"].texture,
+    resources["img/lamp3on.png"].texture
   ];
   // light = new Sprite(resources["img/aSimpleSquare.png"].texture);
   light = new AnimatedSprite(lighttexture);
-  light.x = 2480;
-  light.y = 650;
+  light.x = 2172;
+  light.y = 556;
   light.interactive = true;
   light.cursor = "pointer";
   light.on("mousedown", function() {
     if (!busy) {
       lightIndex = (lightIndex + 1) % 3;
-      light.gotoAndStop(lightIndex);
+      if (lightOn) {
+        light.gotoAndStop(lightIndex + 3);
+      } else {
+        light.gotoAndStop(lightIndex);
+      }
       changeLight();
     }
   });
 
   // lightSwitch = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  lightSwitch = new AnimatedSprite(tube1texture);
-  lightSwitch.x = 2480;
-  lightSwitch.y = 720;
+  const lightSwitchTexture = [
+    resources["img/lampoffbutton.png"].texture,
+    resources["img/lamponbutton.png"].texture
+  ];
+  lightSwitch = new AnimatedSprite(lightSwitchTexture);
+  lightSwitch.x = 2516;
+  lightSwitch.y = 816;
   lightSwitch.interactive = true;
   lightSwitch.cursor = "pointer";
   lightSwitch.on("mousedown", function() {
     if (!busy) {
       lightOn = !lightOn;
       lightSwitch.gotoAndStop((lightSwitch.currentFrame + 1) % 2);
+      if (lightOn) {
+        light.gotoAndStop(lightIndex + 3);
+      } else {
+        light.gotoAndStop(lightIndex);
+      }
       changeLight();
     }
   });
 
-  // card1 = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  card1 = new AnimatedSprite(tube1texture);
-  card1.x = 2240;
-  card1.y = 768;
+  const card1texture = [
+    resources["img/word11.png"].texture,
+    resources["img/word12.png"].texture
+  ];
+  card1 = new AnimatedSprite(card1texture);
+  card1.x = 2236;
+  card1.y = 730;
 
-  // card2 = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  card2 = new AnimatedSprite(tube1texture);
-  card2.x = 2320;
-  card2.y = 768;
+  const card2texture = [
+    resources["img/word21.png"].texture,
+    resources["img/word22.png"].texture
+  ];
+  card2 = new AnimatedSprite(card2texture);
+  card2.x = 2322;
+  card2.y = 736;
 
-  // card3 = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  card3 = new AnimatedSprite(tube1texture);
-  card3.x = 2400;
-  card3.y = 768;
+  const card3texture = [
+    resources["img/word31.png"].texture,
+    resources["img/word32.png"].texture
+  ];
+  card3 = new AnimatedSprite(card3texture);
+  card3.x = 2403;
+  card3.y = 744;
 
   slide1 = new Sprite(resources["img/aSimpleSquare.png"].texture);
   slide1.x = 496;
@@ -603,6 +707,13 @@ function setup() {
   phoneGui.visible = false;
   phoneGui.interactive = true;
 
+  wren = new Sprite(resources["img/wren.png"].texture);
+  wren.x = -600;
+  wren.y = 0;
+  wren.height = windowHeight;
+  wren.width = (16 * wren.height) / 9;
+  wren.visible = false;
+
   settingsButton = new Sprite(resources["img/redSquare.png"].texture);
   settingsButton.x = PHONE_SCREEN_WIDTH * 0.5 - settingsButton.width / 2;
   settingsButton.y = PHONE_SCREEN_HEIGHT * 0.3;
@@ -617,13 +728,14 @@ function setup() {
   chatAppButton.cursor = "pointer";
   chatAppButton.on("mousedown", function() {});
 
-  phoneGui.addChild(settingsButton);
-  phoneGui.addChild(chatAppButton);
+  // phoneGui.addChild(settingsButton);
+  // phoneGui.addChild(chatAppButton);
 
   app.stage.addChild(room);
   app.stage.addChild(phone);
   app.stage.addChild(gui);
   app.stage.addChild(phoneGui);
+  // app.stage.addChild(wren);
 
   app.stage.interactive = true;
   app.stage.on("mouseup", stageMouseUp);
@@ -636,6 +748,8 @@ function setup() {
       if (data.flag === "true") {
         td.cursor = "pointer";
         td.gotoAndStop(1);
+        tdkp.cursor = "default";
+        tdkp.off("mousedown");
         if (data.realm.length > 0) {
           td.on("mousedown", function() {
             if (!busy) {
@@ -785,8 +899,8 @@ function resize() {
 
   gui.x = 0.1 * windowWidth;
   gui.y = 0.1 * windowHeight;
-  gui.width = 0.8 * windowWidth;
-  gui.height = 0.8 * windowHeight;
+  gui.width = 0.9 * windowWidth;
+  gui.height = 0.9 * windowHeight;
 
   phone.x = windowWidth - 100 - phone.width;
   phone.y = windowHeight - 40 - phone.height;
@@ -795,6 +909,9 @@ function resize() {
   phoneGui.height = windowHeight - 2 * phoneGui.y;
   phoneGui.width = (9 * phoneGui.height) / 16;
   phoneGui.x = 0.6 * windowWidth;
+
+  wren.height = windowHeight;
+  wren.width = (16 * wren.height) / 9;
 
   convoHolder.style.left = `${phoneGui.x + 10}px`;
   convoHolder.style.top = `${phoneGui.y + 0.4 * phoneGui.height}px`;
@@ -848,9 +965,14 @@ function stageMouseUp() {
       card.y < td.y + td.height &&
       card.y + card.height > td.y;
     if (withinBounds) {
+      carddrag = false;
       $.ajax("server/td.php", {
         contentType: "application/json",
-        data: { row: card.row, col: card.col },
+        data: {
+          card1: card.chosenCards[0],
+          card2: card.chosenCards[1],
+          card3: card.chosenCards[2]
+        },
         dataType: "json",
         success: function(data, status, xhr) {
           if (data.flag === "true") {
@@ -867,7 +989,6 @@ function stageMouseUp() {
               });
             }, 2000);
           } else {
-            carddrag = false;
             card.x = 1760;
             card.y = 800;
           }
@@ -886,6 +1007,7 @@ function stageMouseUp() {
 
 function openGui(type) {
   // Graphics.drawRect(0.1 * windowWidth, 0.1 * windowHeight, 0.8 * windowWidth, 0.8 * windowHeight);
+
   let textStyle = {
     fontFamily: "Source Sans Pro",
     fontSize: 18,
@@ -897,13 +1019,17 @@ function openGui(type) {
       tdInput.style.display = "block";
       break;
     case "tdman":
-      let texttdman = new Text(
-        resources["json/text.json"].data["tdman"]["gui"],
-        textStyle
-      );
+      // let texttdman = new Text(
+      //   resources["json/text.json"].data["tdman"]["gui"],
+      //   textStyle
+      // );
+      let manual = new Sprite(resources["img/tdman.png"].texture);
+      manual.width = 0.9 * windowWidth;
+      manual.height = 0.9 * windowHeight;
       // text.x = 0.1 * windowWidth;
       // text.y = 0.1 * windowHeight;
-      gui.addChild(texttdman);
+      // gui.addChild(texttdman);
+      gui.addChild(manual);
       break;
     case "mb":
       mb1Input.style.display = "block";
@@ -919,38 +1045,68 @@ function openGui(type) {
       break;
 
     case "witch":
-      let text = new Text(
-        resources["json/text.json"].data["witch"]["gui"],
-        textStyle
-      );
+      // let text = new Text(
+      //   resources["json/text.json"].data["witch"]["gui"],
+      //   textStyle
+      // );
       // text.x = 0.1 * windowWidth;
       // text.y = 0.1 * windowHeight;
-      gui.addChild(text);
+      // gui.addChild(text);
+      let witchGui = new Sprite(resources["img/witch.png"].texture);
+      witchGui.width = 0.9 * windowWidth;
+      witchGui.height = 0.9 * windowHeight;
+      gui.addChild(witchGui);
       break;
     case "me":
-      let me = new Sprite(resources["img/stereogram.jpg"].texture);
-      me.width = 0.8 * windowWidth;
-      me.height = 0.8 * windowHeight;
+      let me = new Sprite(resources["img/magic eye.png"].texture);
+      me.width = 0.9 * windowWidth;
+      me.height = 0.9 * windowHeight;
       gui.addChild(me);
       break;
     case "cp":
-      let cp = new Sprite(resources["img/cardprinter.png"].texture);
-      cp.width = windowWidth * 0.8; // TODO
-      cp.height = windowHeight * 0.8;
+      const cardPrinterTexture = [
+        resources["img/cardprinter.png"].texture,
+        resources["img/cardprinter1.png"].texture,
+        resources["img/cardprinter2.png"].texture,
+        resources["img/cardprinter3.png"].texture
+      ];
+      let cp = new AnimatedSprite(cardPrinterTexture);
+      cp.width = windowWidth * 0.9; // TODO
+      cp.height = windowHeight * 0.9;
 
+      const buttonTexture = [
+        resources["img/cpb.png"].texture,
+        resources["img/cpbpressed.png"].texture
+      ];
       // add all buttons
       let buttonMargin = 20;
-      for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 12; col++) {
-          let button = new Sprite(resources["img/aSimpleSquare.png"].texture);
-          button.width = 100;
-          button.height = 100;
-          button.x = cp.x + 70 + col * (button.width + 50);
-          button.y = cp.y + 250 + row * (button.height + buttonMargin);
+      for (let row = 0; row < 4; row++) {
+        let numCols = 3;
+        if (row === 1 || row === 2) {
+          numCols = 4;
+        }
+        for (let col = 0; col < numCols; col++) {
+          let button = new AnimatedSprite(buttonTexture);
+          button.x = cp.x + 890 + col * (button.width + 10);
+          if (row === 1 || row === 2) {
+            button.x -= 30;
+          }
+          button.y = cp.y + 320 + row * (button.height + buttonMargin);
           button.interactive = true;
           button.cursor = "pointer";
           button.on("mousedown", function() {
-            printCard(row, col);
+            let cardNum = row * 7 + col;
+            if (!chosenCards.includes(cardNum) && chosenCards.length < 3) {
+              chosenCards.push(cardNum);
+              button.gotoAndStop(1);
+              cp.gotoAndStop(cp.currentFrame + 1);
+              if (chosenCards.length == 3) {
+                setTimeout(function() {
+                  cp.gotoAndStop(0);
+                  printCard(chosenCards);
+                }, 500);
+              }
+            }
           });
           cp.addChild(button);
         }
@@ -991,6 +1147,18 @@ function openPhone(convoid) {
       .call(function() {
         playConversation(convoid);
       });
+
+    wren.visible = true;
+    wren.x = -600;
+
+    let finalWrenX = 0;
+    createjs.Tween.get(wren).to(
+      {
+        x: finalWrenX
+      },
+      PHONE_SPEED,
+      createjs.Ease.quadInOut()
+    );
     stopPan = true;
   }
 }
@@ -1000,6 +1168,7 @@ function closeGui() {
   gui.removeChildren();
   stopPan = false;
   app.stage.off("mousedown");
+  chosenCards = [];
 
   let inputs = document.getElementsByTagName("input");
   for (let i = 0; i < inputs.length; i++) {
@@ -1037,6 +1206,19 @@ function closePhone() {
       app.stage.off("mousedown");
       busy = false;
     });
+
+  let finalWrenX = -600;
+  createjs.Tween.get(wren)
+    .to(
+      {
+        x: finalWrenX
+      },
+      PHONE_SPEED,
+      createjs.Ease.quadInOut()
+    )
+    .call(function() {
+      wren.visible = false;
+    });
 }
 
 function validateInput(type, input) {
@@ -1055,6 +1237,8 @@ function validateInput(type, input) {
             setTimeout(function() {
               td.cursor = "pointer";
               td.gotoAndStop(1);
+              tdkp.cursor = "default";
+              tdkp.off("mousedown");
               busy = false;
             }, 1000);
           } else {
@@ -1097,8 +1281,7 @@ function validateInput(type, input) {
   }
 }
 
-function printCard(row, col) {
-  // TODO: MAKE A SERVER CALL, STORE CARD.
+function printCard(chosen) {
   busy = true;
   room.removeChild(card);
   closeGui();
@@ -1106,8 +1289,8 @@ function printCard(row, col) {
   setTimeout(function() {
     // add a card to scene
     card = new Sprite(resources["img/aSimpleSquare.png"].texture);
-    card.row = row;
-    card.col = col;
+    card.chosenCards = chosen;
+    chosenCards = [];
     card.x = 1760;
     card.y = 800;
     card.width = 20;
