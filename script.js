@@ -206,6 +206,8 @@ loader
   .add("img/cpbpressed.png")
   .add("img/boxopen.png")
   .add("img/boxclose.png")
+  .add("img/tdcase.png")
+  .add("img/td.png")
   .add("img/tdman.png")
   .add("img/tube11.png")
   .add("img/tube12.png")
@@ -238,11 +240,24 @@ loader
   .add("img/lampoffbutton.png")
   .add("img/lamponbutton.png")
   .add("img/witch.png")
+  .add("img/witchbutton.png")
+  .add("img/tdmancover.png")
+  .add("img/slide11.png")
+  .add("img/slide12.png")
+  .add("img/slide21.png")
+  .add("img/slide22.png")
+  .add("img/slide31.png")
+  .add("img/slide32.png")
+  .add("img/comic.png")
+  .add("img/symbolsbook.png")
+  .add("img/binarybook.png")
   // text
   .add("json/text.json")
   .add("json/convos.json")
   // sound
-  .add("sound/streets.mp3")
+  .add("sound/streets radiofied.wav")
+  .add("sound/sino radiofied.wav")
+  .add("sound/paadoxical radiofied.wav")
   .on("progress", loadProgressHandler)
   .load(setup);
 
@@ -310,7 +325,7 @@ function setup() {
   document.body.removeChild(loadingText);
   document.body.removeChild(littleBear);
 
-  bgm = resources["sound/streets.mp3"].sound;
+  bgm = resources["sound/streets radiofied.wav"].sound;
   bgm.loop = true;
 
   room = new Container();
@@ -327,13 +342,13 @@ function setup() {
   bg = new Sprite(resources["img/room.png"].texture);
 
   let temptexture = [
-    resources["img/aSimpleSquare.png"].texture,
-    resources["img/redSquare.png"].texture
+    resources["img/tdcase.png"].texture,
+    resources["img/td.png"].texture
   ];
   // td = new Sprite(resources["img/aSimpleSquare.png"].texture);
   td = new AnimatedSprite(temptexture);
-  td.x = 1312;
-  td.y = 416;
+  td.x = 1277;
+  td.y = 373;
   td.interactive = true;
 
   tdkp = new Sprite(resources["img/aSimpleSquare.png"].texture);
@@ -347,9 +362,9 @@ function setup() {
     }
   });
 
-  tdman = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  tdman.x = 1344;
-  tdman.y = 720;
+  tdman = new Sprite(resources["img/tdmancover.png"].texture);
+  tdman.x = 1309;
+  tdman.y = 686;
   tdman.interactive = true;
   tdman.cursor = "pointer";
   tdman.on("mousedown", function() {
@@ -369,9 +384,9 @@ function setup() {
     }
   });
 
-  witch = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  witch.x = 992;
-  witch.y = 720;
+  witch = new Sprite(resources["img/witchbutton.png"].texture);
+  witch.x = 886;
+  witch.y = 682;
   witch.interactive = true;
   witch.cursor = "pointer";
   witch.on("mousedown", function() {
@@ -393,20 +408,9 @@ function setup() {
     }
   });
 
-  bookOfSymbols = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  bookOfSymbols.x = 896;
-  bookOfSymbols.y = 384;
-  bookOfSymbols.interactive = true;
-  bookOfSymbols.cursor = "pointer";
-  bookOfSymbols.on("mousedown", function() {
-    if (!busy) {
-      openGui("bos");
-    }
-  });
-
-  binaryBook = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  binaryBook.x = 832;
-  binaryBook.y = 384;
+  binaryBook = new Sprite(resources["img/binarybook.png"].texture);
+  binaryBook.x = 937;
+  binaryBook.y = 379;
   binaryBook.interactive = true;
   binaryBook.cursor = "pointer";
   binaryBook.on("mousedown", function() {
@@ -415,9 +419,20 @@ function setup() {
     }
   });
 
-  comicBook = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  comicBook.x = 768;
-  comicBook.y = 384;
+  bookOfSymbols = new Sprite(resources["img/symbolsbook.png"].texture);
+  bookOfSymbols.x = 847;
+  bookOfSymbols.y = 360;
+  bookOfSymbols.interactive = true;
+  bookOfSymbols.cursor = "pointer";
+  bookOfSymbols.on("mousedown", function() {
+    if (!busy) {
+      openGui("bos");
+    }
+  });
+
+  comicBook = new Sprite(resources["img/comic.png"].texture);
+  comicBook.x = 810;
+  comicBook.y = 389;
   comicBook.interactive = true;
   comicBook.cursor = "pointer";
   comicBook.on("mousedown", function() {
@@ -601,37 +616,51 @@ function setup() {
   card3.x = 2403;
   card3.y = 744;
 
-  slide1 = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  slide1.x = 496;
-  slide1.y = 736;
+  const slide1texture = [
+    resources["img/slide11.png"].texture,
+    resources["img/slide12.png"].texture
+  ];
+  slide1 = new AnimatedSprite(slide1texture);
+  slide1.x = 440;
+  slide1.y = 780;
   slide1.interactive = true;
   slide1.cursor = "pointer";
   slide1.on("mousedown", function() {
     if (!busy) {
       slide1drag = true;
-      //slide1 frame = next frame
+      slide1.gotoAndStop(1);
     }
   });
 
-  slide2 = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  slide2.x = 608;
-  slide2.y = 752;
+  const slide2texture = [
+    resources["img/slide21.png"].texture,
+    resources["img/slide22.png"].texture
+  ];
+  slide2 = new AnimatedSprite(slide2texture);
+  slide2.x = 580;
+  slide2.y = 786;
   slide2.interactive = true;
   slide2.cursor = "pointer";
   slide2.on("mousedown", function() {
     if (!busy) {
       slide2drag = true;
+      slide2.gotoAndStop(1);
     }
   });
 
-  slide3 = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  slide3.x = 560;
-  slide3.y = 784;
+  const slide3texture = [
+    resources["img/slide31.png"].texture,
+    resources["img/slide32.png"].texture
+  ];
+  slide3 = new AnimatedSprite(slide3texture);
+  slide3.x = 520;
+  slide3.y = 808;
   slide3.interactive = true;
   slide3.cursor = "pointer";
   slide3.on("mousedown", function() {
     if (!busy) {
       slide3drag = true;
+      slide3.gotoAndStop(1);
     }
   });
 
@@ -653,8 +682,8 @@ function setup() {
   room.addChild(magicbox);
   room.addChild(witch);
   room.addChild(radio);
-  room.addChild(bookOfSymbols);
   room.addChild(binaryBook);
+  room.addChild(bookOfSymbols);
   room.addChild(comicBook);
   room.addChild(box);
   room.addChild(tube1);
@@ -746,10 +775,13 @@ function setup() {
     dataType: "json",
     success: function(data, status, xhr) {
       if (data.flag === "true") {
+        // whether td can be used
         td.cursor = "pointer";
         td.gotoAndStop(1);
         tdkp.cursor = "default";
         tdkp.off("mousedown");
+
+        // whether td has a realm set
         if (data.realm.length > 0) {
           td.on("mousedown", function() {
             if (!busy) {
@@ -759,6 +791,7 @@ function setup() {
         }
       }
 
+      // whether a convesation is saved
       currConvoId = data.convoid;
       currMsgIndex = parseInt(data.lastMsgIndex) + 1;
       let convo = resources["json/convos.json"].data[currConvoId];
@@ -841,20 +874,17 @@ function gameLoop(delta) {
 
   // handle dragged items
   if (slide1drag) {
-    slide1.x =
-      ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide1.width / 2;
+    slide1.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide1.width;
     slide1.y =
       ((mousey - room.y) * ROOM_IMG_HEIGHT) / roomHeight - slide1.height / 2;
   }
   if (slide2drag) {
-    slide2.x =
-      ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide2.width / 2;
+    slide2.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide2.width;
     slide2.y =
       ((mousey - room.y) * ROOM_IMG_HEIGHT) / roomHeight - slide2.height / 2;
   }
   if (slide3drag) {
-    slide3.x =
-      ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide3.width / 2;
+    slide3.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide3.width;
     slide3.y =
       ((mousey - room.y) * ROOM_IMG_HEIGHT) / roomHeight - slide3.height / 2;
   }
@@ -946,17 +976,19 @@ function stageMouseDown(event) {
 
 function stageMouseUp() {
   slide1drag = false;
-  slide1.x = 496;
-  slide1.y = 736;
-  //slide1 frame = default
+  slide1.x = 440;
+  slide1.y = 780;
+  slide1.gotoAndStop(0);
 
   slide2drag = false;
-  slide2.x = 608;
-  slide2.y = 752;
+  slide2.x = 580;
+  slide2.y = 786;
+  slide2.gotoAndStop(0);
 
   slide3drag = false;
-  slide3.x = 560;
-  slide3.y = 784;
+  slide3.x = 520;
+  slide3.y = 808;
+  slide3.gotoAndStop(0);
 
   if (carddrag) {
     let withinBounds =
@@ -1240,7 +1272,7 @@ function validateInput(type, input) {
               tdkp.cursor = "default";
               tdkp.off("mousedown");
               busy = false;
-            }, 1000);
+            }, 50);
           } else {
             busy = false;
           }
