@@ -3,7 +3,7 @@ Welcome. Not everything is as it seems.
 # About #
 * Interactive website/puzzle game built in HTML5.
 * Uses the Pixi JS framework.
-* PHP backend to obfuscate secret information (game codewords).
+* PHP backend to obfuscate secret information (game codewords) and save information.
 
 # Images #
 
