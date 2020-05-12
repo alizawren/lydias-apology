@@ -139,6 +139,8 @@ const PHONE_SCREEN_HEIGHT = 1920;
 
 const PHONE_SPEED = 250;
 
+const GUI_BORDER_PERCENTAGE = 0.04;
+
 ////////////////////////////
 
 let type = "WebGL";
@@ -148,10 +150,10 @@ if (!PIXI.utils.isWebGLSupported()) {
 
 // get rid of audio context warnings
 PIXI.utils.sayHello(
-  "Welcome! Not everything is as it seems. You are rendering: " + type
+  "Welcome friend! Not everything's as it seems. You are rendering: " + type
 );
 console.log(
-  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, ♅"
+  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, "
 );
 
 //Aliases
@@ -171,9 +173,10 @@ let app = new Application({
   height: 256,
   antialias: true,
   transparent: false,
-  resolution: 1,
+  resolution: window.devicePixelRatio,
   interactive: true
 });
+//TODO: add a change resolution option
 
 createjs.Ticker.timingMode = createjs.Ticker.RAF;
 
@@ -256,8 +259,8 @@ loader
   .add("json/convos.json")
   // sound
   .add("sound/streets radiofied.wav")
-  .add("sound/sino radiofied.wav")
-  .add("sound/paadoxical radiofied.wav")
+  .add("sound/basic radiofied.wav")
+  .add("sound/hs radiofied.wav")
   .on("progress", loadProgressHandler)
   .load(setup);
 
@@ -339,6 +342,8 @@ function setup() {
     roomWidth = (16 * roomHeight) / 9;
   }
 
+  // let bgTexture = resources["img/room.png"].texture;
+  // bgTexture.baseTexture.mipmap = true;
   bg = new Sprite(resources["img/room.png"].texture);
 
   let temptexture = [
@@ -356,7 +361,7 @@ function setup() {
   tdkp.y = 560;
   tdkp.interactive = true;
   tdkp.cursor = "pointer";
-  tdkp.on("mousedown", function() {
+  tdkp.on("pointerdown", function() {
     if (!busy) {
       openGui("tdkp");
     }
@@ -367,7 +372,7 @@ function setup() {
   tdman.y = 686;
   tdman.interactive = true;
   tdman.cursor = "pointer";
-  tdman.on("mousedown", function() {
+  tdman.on("pointerdown", function() {
     if (!busy) {
       openGui("tdman");
     }
@@ -378,7 +383,7 @@ function setup() {
   magicbox.y = 320;
   magicbox.interactive = true;
   magicbox.cursor = "pointer";
-  magicbox.on("mousedown", function() {
+  magicbox.on("pointerdown", function() {
     if (!busy) {
       openGui("mb");
     }
@@ -389,7 +394,7 @@ function setup() {
   witch.y = 682;
   witch.interactive = true;
   witch.cursor = "pointer";
-  witch.on("mousedown", function() {
+  witch.on("pointerdown", function() {
     if (!busy) {
       openGui("witch");
     }
@@ -400,7 +405,7 @@ function setup() {
   radio.y = 720;
   radio.interactive = true;
   radio.cursor = "pointer";
-  radio.on("mousedown", function() {
+  radio.on("pointerdown", function() {
     if (!bgm.isPlaying) {
       bgm.play();
     } else {
@@ -413,7 +418,7 @@ function setup() {
   binaryBook.y = 379;
   binaryBook.interactive = true;
   binaryBook.cursor = "pointer";
-  binaryBook.on("mousedown", function() {
+  binaryBook.on("pointerdown", function() {
     if (!busy) {
       openGui("bb");
     }
@@ -424,7 +429,7 @@ function setup() {
   bookOfSymbols.y = 360;
   bookOfSymbols.interactive = true;
   bookOfSymbols.cursor = "pointer";
-  bookOfSymbols.on("mousedown", function() {
+  bookOfSymbols.on("pointerdown", function() {
     if (!busy) {
       openGui("bos");
     }
@@ -435,7 +440,7 @@ function setup() {
   comicBook.y = 389;
   comicBook.interactive = true;
   comicBook.cursor = "pointer";
-  comicBook.on("mousedown", function() {
+  comicBook.on("pointerdown", function() {
     if (!busy) {
       openGui("cb");
     }
@@ -450,7 +455,7 @@ function setup() {
   box.y = 930;
   box.interactive = true;
   box.cursor = "pointer";
-  box.on("mousedown", function() {
+  box.on("pointerdown", function() {
     if (!busy) {
       box.gotoAndStop((box.currentFrame + 1) % box.totalFrames);
     }
@@ -469,7 +474,7 @@ function setup() {
   tube1.interactive = true;
   tube1.cursor = "pointer";
   tube1.gotoAndStop(Math.floor(Math.random() * 4));
-  tube1.on("mousedown", function() {
+  tube1.on("pointerdown", function() {
     if (!busy) {
       tube1.gotoAndStop((tube1.currentFrame + 1) % tube1.totalFrames);
     }
@@ -488,7 +493,7 @@ function setup() {
   tube2.interactive = true;
   tube2.cursor = "pointer";
   tube2.gotoAndStop(Math.floor(Math.random() * 4));
-  tube2.on("mousedown", function() {
+  tube2.on("pointerdown", function() {
     if (!busy) {
       tube2.gotoAndStop((tube2.currentFrame + 1) % tube2.totalFrames);
     }
@@ -507,7 +512,7 @@ function setup() {
   tube3.interactive = true;
   tube3.cursor = "pointer";
   tube3.gotoAndStop(Math.floor(Math.random() * 4));
-  tube3.on("mousedown", function() {
+  tube3.on("pointerdown", function() {
     if (!busy) {
       tube3.gotoAndStop((tube3.currentFrame + 1) % tube3.totalFrames);
     }
@@ -526,7 +531,7 @@ function setup() {
   tube4.interactive = true;
   tube4.cursor = "pointer";
   tube4.gotoAndStop(Math.floor(Math.random() * 4));
-  tube4.on("mousedown", function() {
+  tube4.on("pointerdown", function() {
     if (!busy) {
       tube4.gotoAndStop((tube4.currentFrame + 1) % tube4.totalFrames);
     }
@@ -537,7 +542,7 @@ function setup() {
   cardPrinter.y = 720;
   cardPrinter.interactive = true;
   cardPrinter.cursor = "pointer";
-  cardPrinter.on("mousedown", function() {
+  cardPrinter.on("pointerdown", function() {
     if (!busy) {
       openGui("cp");
     }
@@ -557,7 +562,7 @@ function setup() {
   light.y = 556;
   light.interactive = true;
   light.cursor = "pointer";
-  light.on("mousedown", function() {
+  light.on("pointerdown", function() {
     if (!busy) {
       lightIndex = (lightIndex + 1) % 3;
       if (lightOn) {
@@ -579,7 +584,7 @@ function setup() {
   lightSwitch.y = 816;
   lightSwitch.interactive = true;
   lightSwitch.cursor = "pointer";
-  lightSwitch.on("mousedown", function() {
+  lightSwitch.on("pointerdown", function() {
     if (!busy) {
       lightOn = !lightOn;
       lightSwitch.gotoAndStop((lightSwitch.currentFrame + 1) % 2);
@@ -625,7 +630,7 @@ function setup() {
   slide1.y = 780;
   slide1.interactive = true;
   slide1.cursor = "pointer";
-  slide1.on("mousedown", function() {
+  slide1.on("pointerdown", function() {
     if (!busy) {
       slide1drag = true;
       slide1.gotoAndStop(1);
@@ -641,7 +646,7 @@ function setup() {
   slide2.y = 786;
   slide2.interactive = true;
   slide2.cursor = "pointer";
-  slide2.on("mousedown", function() {
+  slide2.on("pointerdown", function() {
     if (!busy) {
       slide2drag = true;
       slide2.gotoAndStop(1);
@@ -657,7 +662,7 @@ function setup() {
   slide3.y = 808;
   slide3.interactive = true;
   slide3.cursor = "pointer";
-  slide3.on("mousedown", function() {
+  slide3.on("pointerdown", function() {
     if (!busy) {
       slide3drag = true;
       slide3.gotoAndStop(1);
@@ -669,7 +674,7 @@ function setup() {
   magiceye.y = 960;
   magiceye.interactive = true;
   magiceye.cursor = "pointer";
-  magiceye.on("mousedown", function() {
+  magiceye.on("pointerdown", function() {
     if (!busy) {
       openGui("me");
     }
@@ -712,8 +717,8 @@ function setup() {
   //   0.8 * windowHeight
   // );
   gui = new Container();
-  gui.x = 0.1 * windowWidth;
-  gui.y = 0.1 * windowHeight;
+  // gui.x = 0.1 * windowWidth;
+  // gui.y = 0.1 * windowHeight;
   // gui.width = 0.8 * windowWidth;
   // gui.height = 0.8 * windowHeight;
   // gui.interactive = true;
@@ -724,7 +729,7 @@ function setup() {
   phone.y = windowHeight - 40 - phone.height;
   phone.interactive = true;
   phone.cursor = "pointer";
-  phone.on("mousedown", function() {
+  phone.on("pointerdown", function() {
     openPhone();
   });
 
@@ -748,14 +753,14 @@ function setup() {
   settingsButton.y = PHONE_SCREEN_HEIGHT * 0.3;
   settingsButton.interactive = true;
   settingsButton.cursor = "pointer";
-  settingsButton.on("mousedown", function() {});
+  settingsButton.on("pointerdown", function() {});
 
   chatAppButton = new Sprite(resources["img/redSquare.png"].texture);
   chatAppButton.x = PHONE_SCREEN_WIDTH * 0.5 - chatAppButton.width / 2;
   chatAppButton.y = PHONE_SCREEN_HEIGHT * 0.6;
   chatAppButton.interactive = true;
   chatAppButton.cursor = "pointer";
-  chatAppButton.on("mousedown", function() {});
+  chatAppButton.on("pointerdown", function() {});
 
   // phoneGui.addChild(settingsButton);
   // phoneGui.addChild(chatAppButton);
@@ -767,7 +772,7 @@ function setup() {
   // app.stage.addChild(wren);
 
   app.stage.interactive = true;
-  app.stage.on("mouseup", stageMouseUp);
+  app.stage.on("pointerup", stagePointerUp);
 
   // now some server calls to set things up
   $.ajax("server/td.php", {
@@ -779,11 +784,11 @@ function setup() {
         td.cursor = "pointer";
         td.gotoAndStop(1);
         tdkp.cursor = "default";
-        tdkp.off("mousedown");
+        tdkp.off("pointerdown");
 
         // whether td has a realm set
         if (data.realm.length > 0) {
-          td.on("mousedown", function() {
+          td.on("pointerdown", function() {
             if (!busy) {
               window.open(data.realm);
             }
@@ -815,7 +820,7 @@ function gameLoop(delta) {
 
   if (gui.visible) {
     // must add listener here and not in openGui or else gui closes immediately
-    app.stage.on("mousedown", stageMouseDown);
+    app.stage.on("pointerdown", stagePointerDown);
   }
   const smoothSpeed = 0.06;
   let mouseEvent = app.renderer.plugins.interaction.eventData.data;
@@ -824,6 +829,7 @@ function gameLoop(delta) {
     mousey = mouseEvent.global.y;
 
     if (!stopPan && mouseEvent.pointerType == "mouse") {
+      // TODO: INCLUDE TOUCH
       // let scalex = 2;
       // let scaley = 1.4;
 
@@ -927,10 +933,14 @@ function resize() {
     room.y = 0;
   }
 
-  gui.x = 0.1 * windowWidth;
-  gui.y = 0.1 * windowHeight;
-  gui.width = 0.9 * windowWidth;
-  gui.height = 0.9 * windowHeight;
+  let [guiX, guiY, guiWidth, guiHeight] = calculateGuiProps(
+    gui.width,
+    gui.height
+  );
+  gui.x = guiX;
+  gui.y = guiY;
+  gui.width = guiWidth;
+  gui.height = guiHeight;
 
   phone.x = windowWidth - 100 - phone.width;
   phone.y = windowHeight - 40 - phone.height;
@@ -949,7 +959,7 @@ function resize() {
   convoHolder.style.height = `${0.45 * phoneGui.height}px`;
 }
 
-function stageMouseDown(event) {
+function stagePointerDown(event) {
   // check if outside bounds of gui
   let mousex = event.data.global.x;
   let mousey = event.data.global.y;
@@ -974,7 +984,7 @@ function stageMouseDown(event) {
   }
 }
 
-function stageMouseUp() {
+function stagePointerUp() {
   slide1drag = false;
   slide1.x = 440;
   slide1.y = 780;
@@ -1012,8 +1022,8 @@ function stageMouseUp() {
             // play a lil animation
             setTimeout(function() {
               card.visible = false;
-              td.off("mousedown");
-              td.on("mousedown", function() {
+              td.off("pointerdown");
+              td.on("pointerdown", function() {
                 if (!busy) {
                   // open a webpage related to the card dragged in
                   window.open(data.realm);
@@ -1038,29 +1048,18 @@ function stageMouseUp() {
 }
 
 function openGui(type) {
-  // Graphics.drawRect(0.1 * windowWidth, 0.1 * windowHeight, 0.8 * windowWidth, 0.8 * windowHeight);
-
-  let textStyle = {
-    fontFamily: "Source Sans Pro",
-    fontSize: 18,
-    wordWrap: true,
-    wordWrapWidth: 500
-  };
+  // let textStyle = {
+  //   fontFamily: "Source Sans Pro",
+  //   fontSize: 18,
+  //   wordWrap: true,
+  //   wordWrapWidth: 500
+  // };
   switch (type) {
     case "tdkp":
       tdInput.style.display = "block";
       break;
     case "tdman":
-      // let texttdman = new Text(
-      //   resources["json/text.json"].data["tdman"]["gui"],
-      //   textStyle
-      // );
       let manual = new Sprite(resources["img/tdman.png"].texture);
-      manual.width = 0.9 * windowWidth;
-      manual.height = 0.9 * windowHeight;
-      // text.x = 0.1 * windowWidth;
-      // text.y = 0.1 * windowHeight;
-      // gui.addChild(texttdman);
       gui.addChild(manual);
       break;
     case "mb":
@@ -1077,22 +1076,11 @@ function openGui(type) {
       break;
 
     case "witch":
-      // let text = new Text(
-      //   resources["json/text.json"].data["witch"]["gui"],
-      //   textStyle
-      // );
-      // text.x = 0.1 * windowWidth;
-      // text.y = 0.1 * windowHeight;
-      // gui.addChild(text);
       let witchGui = new Sprite(resources["img/witch.png"].texture);
-      witchGui.width = 0.9 * windowWidth;
-      witchGui.height = 0.9 * windowHeight;
       gui.addChild(witchGui);
       break;
     case "me":
       let me = new Sprite(resources["img/magic eye.png"].texture);
-      me.width = 0.9 * windowWidth;
-      me.height = 0.9 * windowHeight;
       gui.addChild(me);
       break;
     case "cp":
@@ -1103,8 +1091,6 @@ function openGui(type) {
         resources["img/cardprinter3.png"].texture
       ];
       let cp = new AnimatedSprite(cardPrinterTexture);
-      cp.width = windowWidth * 0.9; // TODO
-      cp.height = windowHeight * 0.9;
 
       const buttonTexture = [
         resources["img/cpb.png"].texture,
@@ -1126,7 +1112,7 @@ function openGui(type) {
           button.y = cp.y + 320 + row * (button.height + buttonMargin);
           button.interactive = true;
           button.cursor = "pointer";
-          button.on("mousedown", function() {
+          button.on("pointerdown", function() {
             let cardNum = row * 7 + col;
             if (!chosenCards.includes(cardNum) && chosenCards.length < 3) {
               chosenCards.push(cardNum);
@@ -1145,8 +1131,35 @@ function openGui(type) {
       }
       gui.addChild(cp);
   }
+  let [guiX, guiY, guiWidth, guiHeight] = calculateGuiProps(
+    gui.width,
+    gui.height
+  );
+  gui.x = guiX;
+  gui.y = guiY;
+  gui.width = guiWidth;
+  gui.height = guiHeight;
   gui.visible = true;
   stopPan = true;
+}
+
+function calculateGuiProps(width, height) {
+  let guiX;
+  let guiY;
+  let guiWidth;
+  let guiHeight;
+  if (windowWidth * height > windowHeight * width) {
+    guiHeight = windowHeight * (1 - 2 * GUI_BORDER_PERCENTAGE);
+    guiY = windowHeight * GUI_BORDER_PERCENTAGE;
+    guiWidth = (width * guiHeight) / height;
+    guiX = windowWidth / 2 - guiWidth / 2;
+  } else {
+    guiWidth = windowWidth * (1 - 2 * GUI_BORDER_PERCENTAGE);
+    guiX = windowWidth * GUI_BORDER_PERCENTAGE;
+    guiHeight = (height * guiWidth) / width;
+    guiY = windowHeight / 2 - guiHeight / 2;
+  }
+  return [guiX, guiY, guiWidth, guiHeight];
 }
 
 function openPhone(convoid) {
@@ -1199,7 +1212,7 @@ function closeGui() {
   gui.visible = false;
   gui.removeChildren();
   stopPan = false;
-  app.stage.off("mousedown");
+  app.stage.off("pointerdown");
   chosenCards = [];
 
   let inputs = document.getElementsByTagName("input");
@@ -1235,7 +1248,7 @@ function closePhone() {
     .call(function() {
       phoneGui.visible = false;
       stopPan = false;
-      app.stage.off("mousedown");
+      app.stage.off("pointerdown");
       busy = false;
     });
 
@@ -1270,7 +1283,7 @@ function validateInput(type, input) {
               td.cursor = "pointer";
               td.gotoAndStop(1);
               tdkp.cursor = "default";
-              tdkp.off("mousedown");
+              tdkp.off("pointerdown");
               busy = false;
             }, 50);
           } else {
@@ -1329,7 +1342,7 @@ function printCard(chosen) {
     card.height = 30;
     card.interactive = true;
     card.cursor = "pointer";
-    card.on("mousedown", function() {
+    card.on("pointerdown", function() {
       if (!busy) {
         carddrag = true;
       }
@@ -1394,10 +1407,10 @@ function playConversation(newConvoId) {
         currConvoId = data.convoid;
         let convo = resources["json/convos.json"].data[currConvoId];
         if (currMsgIndex < convo.length) {
-          app.stage.on("mousedown", addNextMessage);
+          app.stage.on("pointerdown", addNextMessage);
           convoHolder.addEventListener("click", addNextMessage);
         } else {
-          app.stage.on("mousedown", stageMouseDown);
+          app.stage.on("pointerdown", stagePointerDown);
         }
       },
       error: function(xhr, errortype, exception) {
@@ -1408,7 +1421,7 @@ function playConversation(newConvoId) {
     // we're starting a new convo.
     currConvoId = newConvoId;
     currMsgIndex = 0;
-    app.stage.on("mousedown", addNextMessage);
+    app.stage.on("pointerdown", addNextMessage);
     convoHolder.addEventListener("click", addNextMessage);
     addNextMessage();
   }
@@ -1433,8 +1446,8 @@ function addNextMessage() {
   currMsgIndex++;
 
   if (currMsgIndex >= convo.length) {
-    app.stage.off("mousedown");
-    app.stage.on("mousedown", stageMouseDown);
+    app.stage.off("pointerdown");
+    app.stage.on("pointerdown", stagePointerDown);
     convoHolder.removeEventListener("click", addNextMessage);
     return;
   }
