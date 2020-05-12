@@ -128,6 +128,14 @@ convoHolder.style.alignItems = "stretch";
 convoHolder.style.overflowY = "scroll";
 document.body.appendChild(convoHolder);
 
+let credits = document.createElement("div");
+credits.style.display = "none";
+credits.style.position = "absolute";
+credits.style.zIndex = 100;
+credits.style.overflowY = "auto";
+credits.style.fontSize = "2.2vh";
+document.body.appendChild(credits);
+
 ////////////////////////////
 
 // Constants
@@ -139,7 +147,7 @@ const PHONE_SCREEN_HEIGHT = 1920;
 
 const PHONE_SPEED = 250;
 
-const GUI_BORDER_PERCENTAGE = 0.04;
+const GUI_BORDER_PERCENTAGE = 0.02;
 
 ////////////////////////////
 
@@ -209,6 +217,8 @@ loader
   .add("img/cpbpressed.png")
   .add("img/boxopen.png")
   .add("img/boxclose.png")
+  .add("img/safedoor1.png")
+  .add("img/safedoor2.png")
   .add("img/tdcase.png")
   .add("img/td.png")
   .add("img/tdman.png")
@@ -254,6 +264,8 @@ loader
   .add("img/comic.png")
   .add("img/symbolsbook.png")
   .add("img/binarybook.png")
+  .add("img/poetrybutton.png")
+  .add("img/poetry.png")
   // text
   .add("json/text.json")
   .add("json/convos.json")
@@ -406,10 +418,12 @@ function setup() {
   radio.interactive = true;
   radio.cursor = "pointer";
   radio.on("pointerdown", function() {
-    if (!bgm.isPlaying) {
-      bgm.play();
-    } else {
-      bgm.volume = 1 - bgm.volume;
+    if (!busy) {
+      if (!bgm.isPlaying) {
+        bgm.play();
+      } else {
+        bgm.volume = 1 - bgm.volume;
+      }
     }
   });
 
@@ -446,17 +460,26 @@ function setup() {
     }
   });
 
+  // const boxTexture = [
+  //   resources["img/boxclose.png"].texture,
+  //   resources["img/boxopen.png"].texture
+  // ];
   const boxTexture = [
-    resources["img/boxclose.png"].texture,
-    resources["img/boxopen.png"].texture
+    resources["img/safedoor1.png"].texture,
+    resources["img/safedoor2.png"].texture
   ];
   box = new AnimatedSprite(boxTexture);
-  box.x = 1182;
-  box.y = 930;
+  box.x = 1283;
+  box.y = 938;
   box.interactive = true;
   box.cursor = "pointer";
   box.on("pointerdown", function() {
     if (!busy) {
+      if (box.currentFrame == 0) {
+        box.x = 1205;
+      } else {
+        box.x = 1283;
+      }
       box.gotoAndStop((box.currentFrame + 1) % box.totalFrames);
     }
   });
@@ -669,14 +692,27 @@ function setup() {
     }
   });
 
-  magiceye = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  magiceye.x = 1792;
-  magiceye.y = 960;
+  magiceye = new Sprite(resources["img/magic eye.png"].texture);
+  magiceye.x = 1692;
+  magiceye.y = 900;
+  magiceye.width = 280;
+  magiceye.height = 130;
   magiceye.interactive = true;
   magiceye.cursor = "pointer";
   magiceye.on("pointerdown", function() {
     if (!busy) {
       openGui("me");
+    }
+  });
+
+  poetrybutton = new Sprite(resources["img/poetrybutton.png"].texture);
+  poetrybutton.x = 2300;
+  poetrybutton.y = 896;
+  poetrybutton.interactive = true;
+  poetrybutton.cursor = "pointer";
+  poetrybutton.on("pointerdown", function() {
+    if (!busy) {
+      openGui("poem");
     }
   });
 
@@ -705,6 +741,7 @@ function setup() {
   room.addChild(slide2);
   room.addChild(slide3);
   room.addChild(magiceye);
+  room.addChild(poetrybutton);
 
   room.width = roomWidth;
   room.height = roomHeight;
@@ -721,7 +758,7 @@ function setup() {
   // gui.y = 0.1 * windowHeight;
   // gui.width = 0.8 * windowWidth;
   // gui.height = 0.8 * windowHeight;
-  // gui.interactive = true;
+  gui.interactive = true;
   gui.visible = false;
 
   phone = new Sprite(resources["img/aSimpleSquare.png"].texture);
@@ -957,6 +994,11 @@ function resize() {
   convoHolder.style.top = `${phoneGui.y + 0.4 * phoneGui.height}px`;
   convoHolder.style.width = `${phoneGui.width - 20}px`;
   convoHolder.style.height = `${0.45 * phoneGui.height}px`;
+
+  credits.style.left = `${gui.width * 0.78 + gui.x}px`;
+  credits.style.top = `${gui.height * 0.15 + gui.y}px`;
+  credits.style.width = `${gui.width * 0.2}px`;
+  credits.style.height = `${gui.height * 0.6}px`;
 }
 
 function stagePointerDown(event) {
@@ -1048,12 +1090,6 @@ function stagePointerUp() {
 }
 
 function openGui(type) {
-  // let textStyle = {
-  //   fontFamily: "Source Sans Pro",
-  //   fontSize: 18,
-  //   wordWrap: true,
-  //   wordWrapWidth: 500
-  // };
   switch (type) {
     case "tdkp":
       tdInput.style.display = "block";
@@ -1082,6 +1118,35 @@ function openGui(type) {
     case "me":
       let me = new Sprite(resources["img/magic eye.png"].texture);
       gui.addChild(me);
+      let [guiX, guiY, guiWidth, guiHeight] = calculateGuiProps(
+        gui.width,
+        gui.height
+      );
+      gui.x = guiX;
+      gui.y = guiY;
+      gui.width = guiWidth;
+      gui.height = guiHeight;
+      credits.style.display = "block";
+      credits.style.left = `${gui.width * 0.78 + gui.x}px`;
+      credits.style.top = `${gui.height * 0.15 + gui.y}px`;
+      credits.style.width = `${gui.width * 0.2}px`;
+      credits.style.height = `${gui.height * 0.6}px`;
+      credits.style.transform = "rotate(7deg)";
+      $.ajax("server/credits.php", {
+        contentType: "application/json",
+        dataType: "html",
+        success: function(data, status, xhr) {
+          console.log(data);
+          credits.innerHTML = data;
+        },
+        error: function(xhr, errortype, exception) {
+          console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+        }
+      });
+      break;
+    case "poem":
+      let poetry = new Sprite(resources["img/poetry.png"].texture);
+      gui.addChild(poetry);
       break;
     case "cp":
       const cardPrinterTexture = [
@@ -1220,6 +1285,8 @@ function closeGui() {
     inputs[i].value = "";
     inputs[i].style.display = "none";
   }
+
+  credits.style.display = "none";
 }
 
 function closePhone() {
