@@ -51,8 +51,8 @@ tdInput.setAttribute("type", "text");
 tdInput.style.position = "absolute";
 tdInput.style.zIndex = 100;
 tdInput.style.display = "none";
-tdInput.style.top = "400px";
-tdInput.style.left = "500px";
+// tdInput.style.top = "400px";
+// tdInput.style.left = "500px";
 tdInput.addEventListener("keypress", function(event) {
   if (event.key === "Enter") {
     validateInput("td", tdInput.value);
@@ -205,7 +205,8 @@ loader
   .add("img/aSimpleSquare.png")
   .add("img/redSquare.png")
   .add("img/greenSquare.png")
-  .add("img/phoneScreen.png")
+  // .add("img/phoneScreen.png")
+  .add("img/phonenew.png")
   .add("img/wren.png")
   .add("img/cardprinter.png")
   .add("img/cardprinter1.png")
@@ -221,6 +222,8 @@ loader
   .add("img/safedoor2.png")
   .add("img/tdcase.png")
   .add("img/td.png")
+  .add("img/tdkp.png")
+  .add("img/keypad.png")
   .add("img/tdman.png")
   .add("img/tube11.png")
   .add("img/tube12.png")
@@ -262,6 +265,7 @@ loader
   .add("img/slide31.png")
   .add("img/slide32.png")
   .add("img/comic.png")
+  .add("img/comicpage.png")
   .add("img/symbolsbook.png")
   .add("img/binarybook.png")
   .add("img/poetrybutton.png")
@@ -364,13 +368,13 @@ function setup() {
   ];
   // td = new Sprite(resources["img/aSimpleSquare.png"].texture);
   td = new AnimatedSprite(temptexture);
-  td.x = 1277;
+  td.x = 1220;
   td.y = 373;
   td.interactive = true;
 
-  tdkp = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  tdkp.x = 1312;
-  tdkp.y = 560;
+  tdkp = new Sprite(resources["img/tdkp.png"].texture);
+  tdkp.x = 1268;
+  tdkp.y = 568;
   tdkp.interactive = true;
   tdkp.cursor = "pointer";
   tdkp.on("pointerdown", function() {
@@ -380,8 +384,8 @@ function setup() {
   });
 
   tdman = new Sprite(resources["img/tdmancover.png"].texture);
-  tdman.x = 1309;
-  tdman.y = 686;
+  tdman.x = 1319;
+  tdman.y = 675;
   tdman.interactive = true;
   tdman.cursor = "pointer";
   tdman.on("pointerdown", function() {
@@ -492,8 +496,8 @@ function setup() {
   ];
 
   tube1 = new AnimatedSprite(tube1texture);
-  tube1.x = 216;
-  tube1.y = 598;
+  tube1.x = 249;
+  tube1.y = 534;
   tube1.interactive = true;
   tube1.cursor = "pointer";
   tube1.gotoAndStop(Math.floor(Math.random() * 4));
@@ -511,8 +515,8 @@ function setup() {
   ];
 
   tube2 = new AnimatedSprite(tube2texture);
-  tube2.x = 260;
-  tube2.y = 600;
+  tube2.x = 288;
+  tube2.y = 538;
   tube2.interactive = true;
   tube2.cursor = "pointer";
   tube2.gotoAndStop(Math.floor(Math.random() * 4));
@@ -530,8 +534,8 @@ function setup() {
   ];
 
   tube3 = new AnimatedSprite(tube3texture);
-  tube3.x = 304;
-  tube3.y = 602;
+  tube3.x = 327;
+  tube3.y = 529;
   tube3.interactive = true;
   tube3.cursor = "pointer";
   tube3.gotoAndStop(Math.floor(Math.random() * 4));
@@ -549,8 +553,8 @@ function setup() {
   ];
 
   tube4 = new AnimatedSprite(tube4texture);
-  tube4.x = 348;
-  tube4.y = 604;
+  tube4.x = 362;
+  tube4.y = 556;
   tube4.interactive = true;
   tube4.cursor = "pointer";
   tube4.gotoAndStop(Math.floor(Math.random() * 4));
@@ -770,7 +774,7 @@ function setup() {
     openPhone();
   });
 
-  phoneGui = new Sprite(resources["img/phoneScreen.png"].texture);
+  phoneGui = new Sprite(resources["img/phonenew.png"].texture);
   phoneGui.x = phone.x;
   phoneGui.y = phone.y;
   phoneGui.height = 1;
@@ -818,6 +822,8 @@ function setup() {
     success: function(data, status, xhr) {
       if (data.flag === "true") {
         // whether td can be used
+        // this changes the cosmetics of the device... but doesn't let you use it unless you
+        // really unlocked it!
         td.cursor = "pointer";
         td.gotoAndStop(1);
         tdkp.cursor = "default";
@@ -842,6 +848,16 @@ function setup() {
       } else if (data.lastMsgIndex < convo.length - 1) {
         openPhone();
       }
+    },
+    error: function(xhr, errortype, exception) {
+      console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+    }
+  });
+  $.ajax("server/credits.php", {
+    contentType: "application/json",
+    dataType: "html",
+    success: function(data, status, xhr) {
+      credits.innerHTML = data;
     },
     error: function(xhr, errortype, exception) {
       console.error("REQUEST UTTERLY FAILED!", errortype, exception);
@@ -990,10 +1006,16 @@ function resize() {
   wren.height = windowHeight;
   wren.width = (16 * wren.height) / 9;
 
-  convoHolder.style.left = `${phoneGui.x + 10}px`;
-  convoHolder.style.top = `${phoneGui.y + 0.4 * phoneGui.height}px`;
+  convoHolder.style.left = `${phoneGui.x}px`;
+  convoHolder.style.top = `${phoneGui.y + 0.28 * phoneGui.height}px`;
   convoHolder.style.width = `${phoneGui.width - 20}px`;
-  convoHolder.style.height = `${0.45 * phoneGui.height}px`;
+  convoHolder.style.height = `${0.46 * phoneGui.height}px`;
+
+  tdInput.style.left = `${gui.x + 0.11 * gui.width}px`;
+  tdInput.style.top = `${gui.y + 0.28 * gui.height}px`;
+  tdInput.style.width = `${gui.width * 0.78}px`;
+  tdInput.style.height = `${gui.height * 0.05}px`;
+  tdInput.style.fontSize = "24px";
 
   credits.style.left = `${gui.width * 0.78 + gui.x}px`;
   credits.style.top = `${gui.height * 0.15 + gui.y}px`;
@@ -1092,6 +1114,9 @@ function stagePointerUp() {
 function openGui(type) {
   switch (type) {
     case "tdkp":
+      let keypad = new Sprite(resources["img/keypad.png"].texture);
+      gui.addChild(keypad);
+      resize();
       tdInput.style.display = "block";
       break;
     case "tdman":
@@ -1109,6 +1134,8 @@ function openGui(type) {
     case "bb":
       break;
     case "cb":
+      let comicPage = new Sprite(resource["img/comicpage.png"].texture);
+      gui.addChild(comicPage);
       break;
 
     case "witch":
@@ -1132,17 +1159,6 @@ function openGui(type) {
       credits.style.width = `${gui.width * 0.2}px`;
       credits.style.height = `${gui.height * 0.6}px`;
       credits.style.transform = "rotate(7deg)";
-      $.ajax("server/credits.php", {
-        contentType: "application/json",
-        dataType: "html",
-        success: function(data, status, xhr) {
-          console.log(data);
-          credits.innerHTML = data;
-        },
-        error: function(xhr, errortype, exception) {
-          console.error("REQUEST UTTERLY FAILED!", errortype, exception);
-        }
-      });
       break;
     case "poem":
       let poetry = new Sprite(resources["img/poetry.png"].texture);
@@ -1162,7 +1178,8 @@ function openGui(type) {
         resources["img/cpbpressed.png"].texture
       ];
       // add all buttons
-      let buttonMargin = 20;
+      let buttonMarginY = 35;
+      let buttonMarginX = 30;
       for (let row = 0; row < 4; row++) {
         let numCols = 3;
         if (row === 1 || row === 2) {
@@ -1170,11 +1187,11 @@ function openGui(type) {
         }
         for (let col = 0; col < numCols; col++) {
           let button = new AnimatedSprite(buttonTexture);
-          button.x = cp.x + 890 + col * (button.width + 10);
+          button.x = cp.x + 170 + col * (button.width + buttonMarginX);
           if (row === 1 || row === 2) {
-            button.x -= 30;
+            button.x -= 40;
           }
-          button.y = cp.y + 320 + row * (button.height + buttonMargin);
+          button.y = cp.y + 425 + row * (button.height + buttonMarginY);
           button.interactive = true;
           button.cursor = "pointer";
           button.on("pointerdown", function() {
@@ -1336,7 +1353,6 @@ function closePhone() {
 function validateInput(type, input) {
   busy = true;
 
-  // note: right now, we validate input here. Future: validate on server to obfuscate answer
   switch (type) {
     case "td":
       closeGui();
@@ -1347,6 +1363,8 @@ function validateInput(type, input) {
         success: function(data, status, xhr) {
           if (data.flag === "true") {
             setTimeout(function() {
+              // this changes the cosmetics of the device... but doesn't let you use it unless you
+              // really unlocked it!
               td.cursor = "pointer";
               td.gotoAndStop(1);
               tdkp.cursor = "default";
@@ -1445,10 +1463,11 @@ let currMsgIndex;
 let currConvoId;
 
 function playConversation(newConvoId) {
-  convoHolder.style.left = `${phoneGui.x + 0.02 * phoneGui.width}px`;
-  convoHolder.style.top = `${phoneGui.y + 0.4 * phoneGui.height}px`;
-  convoHolder.style.width = `${0.9 * phoneGui.width}px`;
-  convoHolder.style.height = `${0.45 * phoneGui.height}px`;
+  // convoHolder.style.left = `${phoneGui.x + 0.02 * phoneGui.width}px`;
+  // convoHolder.style.top = `${phoneGui.y + 0.4 * phoneGui.height}px`;
+  // convoHolder.style.width = `${0.9 * phoneGui.width}px`;
+  // convoHolder.style.height = `${0.45 * phoneGui.height}px`;
+  resize();
   convoHolder.style.display = "flex";
 
   if (typeof convoHolder.onselectstart != "undefined") {

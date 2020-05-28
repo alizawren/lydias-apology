@@ -26,6 +26,26 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      /* scroll-margin: 0; */
+    }
+
+    .convo::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .convo::-webkit-scrollbar-track {
+      /* background: #f1f1f1;  */
+      background: white;
+    }
+
+    .convo::-webkit-scrollbar-thumb {
+      background: rgb(165, 238, 210);
+      border-radius: 4px;
+      margin: 1px;
+    }
+
+    .convo::-webkit-scrollbar-thumb:hover {
+      background: rgb(123, 206, 212);
     }
 
     @keyframes msgAnim {
