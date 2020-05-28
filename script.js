@@ -147,7 +147,7 @@ const PHONE_SCREEN_HEIGHT = 1920;
 
 const PHONE_SPEED = 250;
 
-const GUI_BORDER_PERCENTAGE = 0.02;
+const GUI_BORDER_PERCENTAGE = 0.015;
 
 ////////////////////////////
 
@@ -270,6 +270,7 @@ loader
   .add("img/binarybook.png")
   .add("img/poetrybutton.png")
   .add("img/poetry.png")
+  .add("img/pen.png")
   // text
   .add("json/text.json")
   .add("json/convos.json")
@@ -300,6 +301,8 @@ let roomHeight = ROOM_IMG_HEIGHT;
 let windowWidth = window.innerWidth;
 let windowHeight = window.innerHeight;
 
+// GLOBAL VARIABLES
+
 let room,
   bg,
   tdkp,
@@ -324,7 +327,9 @@ let room,
   slide2,
   slide3,
   magiceye,
-  card;
+  card,
+  pen,
+  tempLine;
 let chosenCards = [];
 let gui, phone, phoneGui, settingsButton;
 let bgm;
@@ -336,6 +341,13 @@ let lightOn = false;
 let lightIndex = 0;
 let busy = false;
 let stopPan = false;
+var drawOnPage = false;
+var drawing = false;
+let startCoordX = 0;
+let startCoordY = 0;
+var startCoords = [];
+var endCoords = [];
+var lines = [];
 
 //This `setup` function will run when the image has loaded
 function setup() {
@@ -720,6 +732,8 @@ function setup() {
     }
   });
 
+  pen = new Sprite(resources["img/pen.png"].texture);
+
   room.addChild(bg);
   room.addChild(td);
   room.addChild(tdkp);
@@ -952,6 +966,18 @@ function gameLoop(delta) {
     card.y =
       ((mousey - room.y) * ROOM_IMG_HEIGHT) / roomHeight - card.height / 2;
   }
+
+  if (drawOnPage && pen) {
+    pen.x = mousex;
+    pen.y = mousey - pen.height;
+  }
+
+  if (drawOnPage && drawing) {
+    tempLine.clear();
+    tempLine.moveTo(startCoordX, startCoordY);
+    tempLine.lineTo(mousex, mousey);
+    console.log(tempLine);
+  }
 }
 
 function resize() {
@@ -1037,6 +1063,16 @@ function stagePointerDown(event) {
   ) {
     closeGui();
   }
+  if (drawOnPage && !drawing) {
+    drawing = true;
+    startCoordX = mousex;
+    startCoordY = mousey;
+    tempLine = new PIXI.Graphics();
+    tempLine.lineStyle(1, 0xffaaaa);
+    tempLine.moveTo(mousex, mousey);
+    tempLine.lineTo(mousex, mousey);
+    app.stage.addChild(tempLine);
+  }
   if (
     phoneGui.visible == true &&
     (mousex < phoneGui.x ||
@@ -1048,7 +1084,10 @@ function stagePointerDown(event) {
   }
 }
 
-function stagePointerUp() {
+function stagePointerUp(event) {
+  let mousex = event.data.global.x;
+  let mousey = event.data.global.y;
+
   slide1drag = false;
   slide1.x = 440;
   slide1.y = 780;
@@ -1109,9 +1148,23 @@ function stagePointerUp() {
       card.y = 800;
     }
   }
+
+  if (drawOnPage && drawing) {
+    drawing = false;
+    let line = new PIXI.Graphics();
+    line.lineStyle(2, 0xff0000);
+    line.moveTo(startCoordX, startCoordY);
+    line.lineTo(mousex, mousey);
+    lines.push(line);
+    // console.log(line);
+    app.stage.addChild(line);
+    tempLine.clear();
+    app.stage.removeChild(tempLine);
+  }
 }
 
 function openGui(type) {
+  busy = true;
   switch (type) {
     case "tdkp":
       let keypad = new Sprite(resources["img/keypad.png"].texture);
@@ -1121,7 +1174,13 @@ function openGui(type) {
       break;
     case "tdman":
       let manual = new Sprite(resources["img/tdman.png"].texture);
+      // manual.cursor = "url('path to image'),auto";
+      drawOnPage = true;
       gui.addChild(manual);
+      for (var line of lines) {
+        app.stage.addChild(line);
+      }
+      app.stage.addChild(pen);
       break;
     case "mb":
       mb1Input.style.display = "block";
@@ -1134,7 +1193,7 @@ function openGui(type) {
     case "bb":
       break;
     case "cb":
-      let comicPage = new Sprite(resource["img/comicpage.png"].texture);
+      let comicPage = new Sprite(resources["img/comicpage.png"].texture);
       gui.addChild(comicPage);
       break;
 
@@ -1291,11 +1350,18 @@ function openPhone(convoid) {
 }
 
 function closeGui() {
+  busy = false;
   gui.visible = false;
   gui.removeChildren();
   stopPan = false;
   app.stage.off("pointerdown");
   chosenCards = [];
+  drawOnPage = false;
+  drawing = false;
+  app.stage.removeChild(pen);
+  for (var line of lines) {
+    app.stage.removeChild(line);
+  }
 
   let inputs = document.getElementsByTagName("input");
   for (let i = 0; i < inputs.length; i++) {
@@ -1592,3 +1658,12 @@ function addMessageUi(msg) {
   }
   convoHolder.appendChild(msgContainer);
 }
+
+document.addEventListener("keydown", function(key) {
+  if (key.keyCode == "81") {
+    for (var line of lines) {
+      app.stage.removeChild(line);
+    }
+    lines = [];
+  }
+});
