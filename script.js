@@ -206,6 +206,7 @@ loader
   .add("img/redSquare.png")
   .add("img/greenSquare.png")
   // .add("img/phoneScreen.png")
+  .add("img/phoneicon.png")
   .add("img/phonenew.png")
   .add("img/wren.png")
   .add("img/cardprinter.png")
@@ -665,8 +666,8 @@ function setup() {
     resources["img/slide12.png"].texture
   ];
   slide1 = new AnimatedSprite(slide1texture);
-  slide1.x = 440;
-  slide1.y = 780;
+  slide1.x = 555;
+  slide1.y = 725;
   slide1.interactive = true;
   slide1.cursor = "pointer";
   slide1.on("pointerdown", function() {
@@ -681,8 +682,8 @@ function setup() {
     resources["img/slide22.png"].texture
   ];
   slide2 = new AnimatedSprite(slide2texture);
-  slide2.x = 580;
-  slide2.y = 786;
+  slide2.x = 530;
+  slide2.y = 710;
   slide2.interactive = true;
   slide2.cursor = "pointer";
   slide2.on("pointerdown", function() {
@@ -697,8 +698,8 @@ function setup() {
     resources["img/slide32.png"].texture
   ];
   slide3 = new AnimatedSprite(slide3texture);
-  slide3.x = 520;
-  slide3.y = 808;
+  slide3.x = 510;
+  slide3.y = 700;
   slide3.interactive = true;
   slide3.cursor = "pointer";
   slide3.on("pointerdown", function() {
@@ -755,9 +756,9 @@ function setup() {
   room.addChild(card1);
   room.addChild(card2);
   room.addChild(card3);
-  room.addChild(slide1);
-  room.addChild(slide2);
   room.addChild(slide3);
+  room.addChild(slide2);
+  room.addChild(slide1);
   room.addChild(magiceye);
   room.addChild(poetrybutton);
 
@@ -779,7 +780,7 @@ function setup() {
   gui.interactive = true;
   gui.visible = false;
 
-  phone = new Sprite(resources["img/aSimpleSquare.png"].texture);
+  phone = new Sprite(resources["img/phoneicon.png"].texture);
   phone.x = windowWidth - 100 - phone.width;
   phone.y = windowHeight - 40 - phone.height;
   phone.interactive = true;
@@ -947,17 +948,17 @@ function gameLoop(delta) {
 
   // handle dragged items
   if (slide1drag) {
-    slide1.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide1.width;
+    slide1.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth; // - slide1.width;
     slide1.y =
       ((mousey - room.y) * ROOM_IMG_HEIGHT) / roomHeight - slide1.height / 2;
   }
   if (slide2drag) {
-    slide2.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide2.width;
+    slide2.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth; // - slide2.width;
     slide2.y =
       ((mousey - room.y) * ROOM_IMG_HEIGHT) / roomHeight - slide2.height / 2;
   }
   if (slide3drag) {
-    slide3.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth - slide3.width;
+    slide3.x = ((mousex - room.x) * ROOM_IMG_WIDTH) / roomWidth; // - slide3.width;
     slide3.y =
       ((mousey - room.y) * ROOM_IMG_HEIGHT) / roomHeight - slide3.height / 2;
   }
@@ -974,10 +975,14 @@ function gameLoop(delta) {
 
   if (drawOnPage && drawing) {
     tempLine.clear();
+    tempLine.lineStyle(2, 0xffaaaa);
     tempLine.moveTo(startCoordX, startCoordY);
     tempLine.lineTo(mousex, mousey);
-    console.log(tempLine);
   }
+
+  let test;
+  test = new Sprite(resources["img/aSimpleSquare.png"].texture);
+  app.stage.addChild(test);
 }
 
 function resize() {
@@ -1068,7 +1073,7 @@ function stagePointerDown(event) {
     startCoordX = mousex;
     startCoordY = mousey;
     tempLine = new PIXI.Graphics();
-    tempLine.lineStyle(1, 0xffaaaa);
+    tempLine.lineStyle(2, 0xffaaaa);
     tempLine.moveTo(mousex, mousey);
     tempLine.lineTo(mousex, mousey);
     app.stage.addChild(tempLine);
@@ -1089,18 +1094,18 @@ function stagePointerUp(event) {
   let mousey = event.data.global.y;
 
   slide1drag = false;
-  slide1.x = 440;
-  slide1.y = 780;
+  slide1.x = 555;
+  slide1.y = 725;
   slide1.gotoAndStop(0);
 
   slide2drag = false;
-  slide2.x = 580;
-  slide2.y = 786;
+  slide2.x = 530;
+  slide2.y = 710;
   slide2.gotoAndStop(0);
 
   slide3drag = false;
-  slide3.x = 520;
-  slide3.y = 808;
+  slide3.x = 510;
+  slide3.y = 700;
   slide3.gotoAndStop(0);
 
   if (carddrag) {
