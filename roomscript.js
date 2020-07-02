@@ -161,7 +161,7 @@ PIXI.utils.sayHello(
   "Welcome friend! Not everything's as it seems. You are rendering: " + type
 );
 console.log(
-  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, "
+  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, 🜅"
 );
 
 //Aliases
@@ -217,6 +217,20 @@ loader
   .add("img/magic eye.png")
   .add("img/cpb.png")
   .add("img/cpbpressed.png")
+  .add("img/symbol1.png")
+  .add("img/symbol2.png")
+  .add("img/symbol3.png")
+  .add("img/symbol4.png")
+  .add("img/symbol5.png")
+  .add("img/symbol6.png")
+  .add("img/symbol7.png")
+  .add("img/symbol8.png")
+  .add("img/symbol9.png")
+  .add("img/symbol10.png")
+  .add("img/symbol11.png")
+  .add("img/symbol12.png")
+  .add("img/symbol13.png")
+  .add("img/symbol14.png")
   .add("img/boxopen.png")
   .add("img/boxclose.png")
   .add("img/safedoor1.png")
@@ -979,10 +993,6 @@ function gameLoop(delta) {
     tempLine.moveTo(startCoordX, startCoordY);
     tempLine.lineTo(mousex, mousey);
   }
-
-  let test;
-  test = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  app.stage.addChild(test);
 }
 
 function resize() {
@@ -1040,7 +1050,7 @@ function resize() {
   convoHolder.style.left = `${phoneGui.x}px`;
   convoHolder.style.top = `${phoneGui.y + 0.28 * phoneGui.height}px`;
   convoHolder.style.width = `${phoneGui.width - 20}px`;
-  convoHolder.style.height = `${0.46 * phoneGui.height}px`;
+  convoHolder.style.height = `${0.66 * phoneGui.height}px`;
 
   tdInput.style.left = `${gui.x + 0.11 * gui.width}px`;
   tdInput.style.top = `${gui.y + 0.28 * gui.height}px`;
@@ -1242,27 +1252,40 @@ function openGui(type) {
         resources["img/cpbpressed.png"].texture
       ];
       // add all buttons
-      let buttonMarginY = 35;
-      let buttonMarginX = 30;
+      let buttonMarginY = -25;
+      let buttonMarginX = 29;
       for (let row = 0; row < 4; row++) {
         let numCols = 3;
         if (row === 1 || row === 2) {
           numCols = 4;
         }
         for (let col = 0; col < numCols; col++) {
-          let button = new AnimatedSprite(buttonTexture);
-          button.x = cp.x + 170 + col * (button.width + buttonMarginX);
+          let cardIndex =
+            1 + row * 3 + col + (row > 1 ? 1 : 0) + (row > 2 ? 1 : 0);
+          let buttonSprite = new AnimatedSprite(buttonTexture);
+          let path = `img/symbol${cardIndex}.png`;
+          let symbol = new Sprite(resources[path].texture);
+          let symbolFilter = new PIXI.filters.ColorMatrixFilter();
+          symbol.width = 80;
+          symbol.height = 80;
+          let button = new Container();
+          button.addChild(buttonSprite);
+          button.addChild(symbol);
+          button.x = cp.x + 169 + col * (button.width + buttonMarginX);
           if (row === 1 || row === 2) {
-            button.x -= 40;
+            button.x -= 54;
           }
           button.y = cp.y + 425 + row * (button.height + buttonMarginY);
           button.interactive = true;
           button.cursor = "pointer";
           button.on("pointerdown", function() {
-            let cardNum = row * 7 + col;
-            if (!chosenCards.includes(cardNum) && chosenCards.length < 3) {
-              chosenCards.push(cardNum);
-              button.gotoAndStop(1);
+            if (!chosenCards.includes(cardIndex) && chosenCards.length < 3) {
+              chosenCards.push(cardIndex);
+              buttonSprite.gotoAndStop(1);
+              symbol.y += 13;
+              let darkFilter = new PIXI.filters.ColorMatrixFilter();
+              symbol.filters = [darkFilter];
+              darkFilter.brightness(0.8);
               cp.gotoAndStop(cp.currentFrame + 1);
               if (chosenCards.length == 3) {
                 setTimeout(function() {
@@ -1656,7 +1679,7 @@ function addMessageUi(msg) {
     msgContainer.appendChild(msgBubble);
   } else if (char === "wren") {
     msgContainer.style.justifyContent = "flex-end";
-    msgBubble.style.background = "#dbdfff";
+    msgBubble.style.background = "#abedda";
     msgIcon.src = "img/aSimpleSquare.png";
     msgContainer.appendChild(msgBubble);
     msgContainer.appendChild(msgIcon);
