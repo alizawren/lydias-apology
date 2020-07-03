@@ -883,7 +883,6 @@ function setup() {
     }
   });
   $.ajax("server/credits.php", {
-    contentType: "application/json",
     dataType: "html",
     success: function(data, status, xhr) {
       credits.innerHTML = data;
@@ -1000,6 +999,8 @@ function resize() {
   windowWidth = window.innerWidth;
   windowHeight = window.innerHeight;
 
+  app.renderer.resize(windowWidth, windowHeight);
+
   // scale room (bg, etc) to size
   if (windowWidth / windowHeight > 16 / 9) {
     roomWidth = 1.1 * windowWidth;
@@ -1011,8 +1012,6 @@ function resize() {
 
   room.width = roomWidth;
   room.height = roomHeight;
-
-  app.renderer.resize(windowWidth, windowHeight);
 
   if (room.x < windowWidth - roomWidth) {
     room.x = windowWidth - roomWidth;
