@@ -209,7 +209,8 @@ loader
   .add("img/phoneicon.png")
   .add("img/phonenew.png")
   .add("img/wren.png")
-  .add("img/cardprinter.png")
+  // .add("img/cardprinter.png")
+  .add("img/cardprinterrendered.png")
   .add("img/cardprinter1.png")
   .add("img/cardprinter2.png")
   .add("img/cardprinter3.png")
@@ -283,6 +284,7 @@ loader
   .add("img/comicpage.png")
   .add("img/symbolsbook.png")
   .add("img/binarybook.png")
+  .add("img/binary.png")
   .add("img/poetrybutton.png")
   .add("img/poetry.png")
   .add("img/pen.png")
@@ -1205,6 +1207,9 @@ function openGui(type) {
     case "bos":
       break;
     case "bb":
+      let binaryPage = new Sprite(resources["img/binary.png"].texture);
+      gui.addChild(binaryPage);
+      break;
       break;
     case "cb":
       let comicPage = new Sprite(resources["img/comicpage.png"].texture);
@@ -1239,7 +1244,7 @@ function openGui(type) {
       break;
     case "cp":
       const cardPrinterTexture = [
-        resources["img/cardprinter.png"].texture,
+        resources["img/cardprinterrendered.png"].texture,
         resources["img/cardprinter1.png"].texture,
         resources["img/cardprinter2.png"].texture,
         resources["img/cardprinter3.png"].texture

@@ -1,3 +1,5 @@
+// The real question is, why don't I just obfuscate everything to the server? Too late, you live and you learn.
+
 // loading DOM elts
 
 let loadBox = document.createElement("div");
@@ -64,14 +66,17 @@ dialogue.style.position = "absolute";
 dialogue.style.zIndex = 100;
 dialogue.style.overflowY = "auto";
 dialogue.style.display = "none";
+dialogue.onclick = advanceDialogue;
 document.body.appendChild(dialogue);
 
 // Constants
 const BG_IMG_WIDTH = 2560;
 const BG_IMG_HEIGHT = 1440;
 
-const WREN_IMG_WIDTH = 486;
-const WREN_IMG_HEIGHT = 1061;
+const char_IMG_WIDTH = 486;
+const char_IMG_HEIGHT = 1061;
+
+const GUI_BORDER_PERCENTAGE = 0.015;
 
 let type = "WebGL";
 if (!PIXI.utils.isWebGLSupported()) {
@@ -125,19 +130,26 @@ loader
   .add("img/bedroom.png")
   .add("img/tutoringMaterials.png")
   .add("img/resumes.png")
+  .add("img/resumeGui.png")
   .add("img/poster.png")
+  .add("img/break.jpg")
   .add("img/computer.png")
+  .add("img/computerGui.png")
   .add("img/bedroomarrow.png")
   // .add("img/wren.png")
   .add("img/wren sprite.png")
+  .add("img/girl.png")
   .add("img/leftBox.png")
   .add("img/middleBox.png")
   .add("img/rightBox.png")
+  .add("img/wealthyhouse.png")
   // text
   //   .add("json/text.json")
   //   .add("json/convos.json")
   // sound
   .add("sound/wren.wav")
+  .add("sound/girl.wav")
+  .add("sound/children.wav")
   .on("progress", loadProgressHandler)
   .load(setup);
 
@@ -162,25 +174,30 @@ let windowWidth = window.innerWidth;
 let windowHeight = window.innerHeight;
 
 // GLOBAL VARIABLES
-let titleScreen,
+let bgm,
+  snd,
+  titleScreen,
   titleScreenBg,
   title,
   playbutton,
   // blackScreen,
   bg,
-  wren,
+  char,
   textBox,
   instructions,
+  gui,
   tutorMaterials,
   resume,
   poster,
   computer,
   arrow;
-let busy = false;
+let busy = true; // whether you can interact with bg items
 let fadeIn = false;
 let fadeOut = false;
 let startedRoom = false;
 let stopPan = false;
+let inDialogue = false;
+let currentDialogue = null;
 
 //This `setup` function will run when resources have loaded
 function setup() {
@@ -216,6 +233,7 @@ function setup() {
   ////// game
 
   bgm = resources["sound/wren.wav"].sound;
+  bgm.volume = 0.3;
   bgm.loop = true;
 
   bg = new Container();
@@ -241,13 +259,32 @@ function setup() {
   arrow.x = 1070;
   arrow.y = 1230;
 
+  gui = new Container();
+  gui.interactive = true;
+  gui.visible = false;
+  gui.zIndex = 10;
+
   bg.addChild(bgImg);
   bg.addChild(tutorMaterials);
   bg.addChild(resume);
   bg.addChild(poster);
   bg.addChild(computer);
   bg.addChild(arrow);
-  bg.interactive = false;
+
+  // scale room (bg, etc) to size
+  if (windowWidth / windowHeight > 16 / 9) {
+    bgWidth = 1.1 * windowWidth;
+    bgHeight = (9 * bgWidth) / 16;
+  } else {
+    bgHeight = 1.1 * windowHeight;
+    bgWidth = (16 * bgHeight) / 9;
+  }
+
+  bg.width = bgWidth;
+  bg.height = bgHeight;
+
+  bg.x = -Math.abs(windowWidth - bg.width) / 2;
+  bg.y = -Math.abs(windowHeight - bg.height) / 2;
 
   instructions = new Text("", {
     fontFamily: "Raleway",
@@ -269,7 +306,9 @@ function setup() {
     }
   });
 
-  wren = new Sprite(resources["img/wren sprite.png"].texture);
+  // sprites
+
+  char = new Sprite(resources["img/wren sprite.png"].texture);
 
   textBox = new Container();
 
@@ -288,7 +327,7 @@ function setup() {
   app.stage.sortableChildren = true;
 
   app.stage.interactive = true;
-  app.stage.on("pointerdown", stagePointerDown);
+  // app.stage.on("pointerdown", stagePointerDown);
 
   app.ticker.add(delta => gameLoop(delta));
 
@@ -296,71 +335,91 @@ function setup() {
 }
 
 function playGame() {
-  if (busy) {
-    return;
-  }
   busy = true;
 
   blackScreen.style.display = "block";
   blackScreen.style.opacity = 0;
 
   fadeIn = true;
-  setInterval(function() {
+  let fadeInInterval = setInterval(function() {
     if (fadeIn) {
       if (blackScreen.style.opacity < 1) {
         blackScreen.style.opacity = parseFloat(blackScreen.style.opacity) + 0.1;
       } else {
+        clearInterval(fadeInInterval);
         fadeIn = false;
         // remove game objects
         app.stage.removeChild(titleScreenBg);
         app.stage.removeChild(titleScreen);
         // add all the game objects
         app.stage.addChild(bg);
-        app.stage.addChild(wren);
+        app.stage.addChild(char);
         app.stage.addChild(textBox);
         app.stage.addChild(soundbutton);
         app.stage.addChild(instructions);
+        app.stage.addChild(gui);
+
+        currentDialogue = "intro";
 
         // fetch the dialogue from the server
         $.ajax("server/dialogue.php", {
+          data: { startDialogue: true, dialogue: currentDialogue },
+          contentType: "application/json",
           dataType: "json",
           success: function(data, status, xhr) {
+            if (data.sound) {
+              if (snd) {
+                snd.stop();
+              }
+              snd = resources[data.sound].sound;
+              snd.play();
+            }
             if (data.text.length > 0) {
+              if (data.char === "wren" || data.char === "none") {
+                char.texture = resources["img/wren sprite.png"].texture;
+                char.x = 200;
+              } else if (data.char.length > 0) {
+                char.texture = resources[`img/${data.char}.png`].texture;
+                char.x = windowWidth - 200 - char.width;
+              }
               dialogue.style.display = "block";
-              dialogue.onclick = advanceDialogue;
               dialogue.innerHTML = data.text;
+              inDialogue = true;
             } else {
               dialogue.style.display = "none";
-              wren.x = -wren.width;
-              wren.visible = false;
+              char.x = -char.width;
+              char.visible = false;
               textBox.y = windowHeight;
               textBox.visible = false;
+              inDialogue = false;
               startRoom2();
+            }
+            if (data.tutor) {
+              bg.removeChild(tutorMaterials);
             }
           },
           error: function(xhr, errortype, exception) {
-            // console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+            console.error("REQUEST UTTERLY FAILED!", errortype, exception);
             alert(
-              "There was a server error. Try again later. ",
-              errortype,
-              exception
+              "There was a server error. Try again later or wait till I fix things. -Alizarin"
             );
           }
         });
 
-        wren.zIndex = 1;
-        textBox.zIndex = 2;
-        instructions.zIndex = 3;
+        char.zIndex = 2;
+        textBox.zIndex = 3;
+        instructions.zIndex = 1;
         resize();
         // play music
         setTimeout(function() {
           bgm.play();
           fadeOut = true;
-          setInterval(function() {
+          let fadeOutInterval = setInterval(function() {
             if (fadeOut) {
               if (blackScreen.style.opacity > 0) {
                 blackScreen.style.opacity -= 0.1;
               } else {
+                clearInterval(fadeOutInterval);
                 fadeOut = false;
                 blackScreen.style.display = "none";
               }
@@ -374,82 +433,78 @@ function playGame() {
 }
 
 function advanceDialogue() {
-  console.log("advancing text");
+  if (!inDialogue) {
+    return;
+  }
+  if (snd && snd.isPlaying) {
+    let int = setInterval(function() {
+      if (snd.volume <= 0) {
+        snd.stop();
+        clearInterval(int);
+      } else {
+        snd.volume -= 0.08;
+      }
+    }, 40);
+  }
+  // console.log("advancing text");
   $.ajax("server/dialogue.php", {
-    data: { advanceDialogue: true },
+    data: { advanceDialogue: true, dialogue: currentDialogue },
     contentType: "application/json",
     dataType: "json",
     success: function(data, status, xhr) {
+      if (data.sound) {
+        if (snd) {
+          snd.stop();
+        }
+        snd = resources[data.sound].sound;
+        snd.play();
+      }
       if (data.text.length > 0) {
+        if (data.char === "wren" || data.char === "none") {
+          char.texture = resources["img/wren sprite.png"].texture;
+          char.x = 200;
+        } else if (data.char.length > 0) {
+          char.texture = resources[`img/${data.char}.png`].texture;
+          char.x = windowWidth - 200 - char.width;
+        }
         dialogue.innerHTML = data.text;
       } else {
-        if (data.dialogue == 0) {
-          dialogue.style.display = "none";
+        if (currentDialogue == "intro") {
           startRoom();
+        } else if (currentDialogue == "tutor") {
+          closeDialogue(function() {
+            bg.removeChild(tutorMaterials);
+          });
+        } else if (currentDialogue == "arrow") {
+          if (data.moveOn) {
+            closeDialogue(function() {
+              startScene2();
+            });
+          } else {
+            closeDialogue();
+          }
         }
+        dialogue.style.display = "none";
+        currentDialogue = null;
       }
     },
     error: function(xhr, errortype, exception) {
-      // console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+      console.error("REQUEST UTTERLY FAILED!", errortype, exception);
       alert(
-        "There was a server error. Try again later. ",
-        errortype,
-        exception
+        "There was a server error. Try again later or wait till I fix things. -Alizarin"
       );
     }
   });
 }
 
 function startRoom() {
-  let finalX = -wren.width;
-  createjs.Tween.get(wren)
-    .to(
-      {
-        x: finalX
-      },
-      200,
-      createjs.Ease.elasticInOut()
-    )
-    .call(function() {
-      wren.visible = false;
-      startRoom2();
-    });
-
-  let finalY = windowHeight;
-  createjs.Tween.get(textBox)
-    .to(
-      {
-        y: finalY
-      },
-      200,
-      createjs.Ease.elasticInOut()
-    )
-    .call(function() {
-      textBox.visible = false;
-    });
+  closeDialogue(startRoom2);
 }
 
 function startRoom2() {
   startedRoom = true;
-  bg.interactive = true;
 
-  tutorMaterials.cursor = "pointer";
-  tutorMaterials.interactive = true;
-
-  resume.cursor = "pointer";
-  resume.interactive = true;
-
-  poster.cursor = "pointer";
-  poster.interactive = true;
-
-  computer.cursor = "pointer";
-  computer.interactive = true;
-  computer.on("pointerdown", function() {
-    alert("beep boop I'm a computer");
-  });
-
-  arrow.cursor = "pointer";
-  arrow.interactive = true;
+  setUnBusy();
 
   instructions.text = "Click on objects around the room to progress.";
   instructions.pivot.x = instructions.width / 2;
@@ -473,21 +528,25 @@ function startRoom2() {
 }
 
 function gameLoop(delta) {
-  if (busy) {
-    app.stage.interactive = false;
-  } else {
-    app.stage.interactive = true;
+  if (gui.visible) {
+    app.stage.on("pointerdown", stagePointerDown);
   }
 
   let mousex;
   let mousey;
+
   const smoothSpeed = 0.06;
   let mouseEvent = app.renderer.plugins.interaction.eventData.data;
   if (mouseEvent) {
     mousex = mouseEvent.global.x;
     mousey = mouseEvent.global.y;
 
-    if (!stopPan && startedRoom && mouseEvent.pointerType == "mouse") {
+    if (
+      !stopPan &&
+      !inDialogue &&
+      startedRoom &&
+      mouseEvent.pointerType == "mouse"
+    ) {
       // TODO: INCLUDE TOUCH
 
       let offsetx = 100; // amount of pan area to cut off
@@ -566,10 +625,14 @@ function resize() {
   instructions.x = windowWidth / 2;
   instructions.y = windowHeight * 0.1;
 
-  wren.height = 0.95 * windowHeight;
-  wren.width = (WREN_IMG_WIDTH / WREN_IMG_HEIGHT) * wren.height;
-  wren.y = 0.05 * windowHeight;
-  wren.x = 200;
+  char.height = 0.95 * windowHeight;
+  char.width = (char_IMG_WIDTH / char_IMG_HEIGHT) * char.height;
+  char.y = 0.05 * windowHeight;
+  if (char.texture == resources["img/wren sprite.png"].texture) {
+    char.x = 200;
+  } else {
+    char.x = windowWidth - 200 - char.width;
+  }
 
   textBox.x = 0;
   textBox.y = windowHeight - middleBox.height;
@@ -582,22 +645,320 @@ function resize() {
   dialogue.style.width = `${middleBox.width}px`;
   dialogue.style.height = `${leftBox.height - 90 - 40}px`;
 
-  // if (bg.x < windowWidth - bgWidth) {
-  //   bg.x = windowWidth - bgWidth;
-  // }
-  // if (bg.y < windowHeight - bgHeight) {
-  //   bg.y = windowHeight - bgHeight;
-  // }
-  // if (bg.x > 0) {
-  //   bg.x = 0;
-  // }
-  // if (bg.y > 0) {
-  //   bg.y = 0;
-  // }
+  // sanity checking?
+  if (bg.x < windowWidth - bgWidth) {
+    bg.x = windowWidth - bgWidth;
+  }
+  if (bg.y < windowHeight - bgHeight) {
+    bg.y = windowHeight - bgHeight;
+  }
+  if (bg.x > 0) {
+    bg.x = 0;
+  }
+  if (bg.y > 0) {
+    bg.y = 0;
+  }
 }
 
 function stagePointerDown(event) {
   // check if outside bounds of gui
   let mousex = event.data.global.x;
   let mousey = event.data.global.y;
+
+  if (
+    gui.visible &&
+    (mousex < gui.x ||
+      mousex > gui.x + gui.width ||
+      mousey < gui.y ||
+      mousey > gui.y + gui.height)
+  ) {
+    closeGui();
+  }
+}
+
+function openDialogue(callback) {
+  char.visible = true;
+  textBox.visible = true;
+  stopPan = true;
+  let finalX = 200;
+  createjs.Tween.get(char)
+    .to(
+      {
+        x: finalX
+      },
+      200,
+      createjs.Ease.elasticInOut()
+    )
+    .call(function() {});
+  let finalY = windowHeight - leftBox.height;
+  createjs.Tween.get(textBox)
+    .to(
+      {
+        y: finalY
+      },
+      200,
+      createjs.Ease.elasticInOut()
+    )
+    .call(function() {
+      callback();
+      inDialogue = true;
+    });
+}
+
+function closeDialogue(callback) {
+  console.log("closing");
+  inDialogue = false;
+  let finalX = -char.width;
+  createjs.Tween.get(char)
+    .to(
+      {
+        x: finalX
+      },
+      200,
+      createjs.Ease.elasticInOut()
+    )
+    .call(function() {
+      char.visible = false;
+      if (callback) {
+        console.log(char);
+        stopPan = false;
+        callback();
+      }
+    });
+
+  let finalY = windowHeight;
+  createjs.Tween.get(textBox)
+    .to(
+      {
+        y: finalY
+      },
+      200,
+      createjs.Ease.elasticInOut()
+    )
+    .call(function() {
+      textBox.visible = false;
+    });
+}
+
+function startDialogue() {
+  // fetch the dialogue from the server
+  $.ajax("server/dialogue.php", {
+    data: { startDialogue: true, dialogue: currentDialogue },
+    contentType: "application/json",
+    dataType: "json",
+    success: function(data, status, xhr) {
+      if (data.sound) {
+        if (snd) {
+          snd.stop();
+        }
+        snd = resources[data.sound].sound;
+        snd.play();
+      }
+      if (data.char === "wren" || data.char === "none") {
+        char.texture = resources["img/wren sprite.png"].texture;
+        char.x = 200;
+      } else if (data.char.length > 0) {
+        char.texture = resources[`img/${data.char}.png`].texture;
+        char.x = windowWidth - 200 - char.width;
+      }
+      dialogue.style.display = "block";
+      dialogue.innerHTML = data.text;
+    },
+    error: function(xhr, errortype, exception) {
+      console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+      alert(
+        "There was a server error. Try again later or wait till I fix things. -Alizarin"
+      );
+    }
+  });
+}
+
+function getTutorMaterials() {
+  currentDialogue = "tutor";
+  openDialogue(startDialogue);
+}
+
+function clickArrow() {
+  currentDialogue = "arrow";
+  openDialogue(startDialogue);
+}
+
+function openGui(type) {
+  setBusy();
+  switch (type) {
+    case "resume":
+      let resumeGui = new Sprite(resources["img/resumeGui.png"].texture);
+      gui.addChild(resumeGui);
+      break;
+    case "poster":
+      let posterGui = new Sprite(resources["img/break.jpg"].texture);
+      gui.addChild(posterGui);
+      break;
+    case "computer":
+      let computerGui = new Sprite(resources["img/computerGui.png"].texture);
+      gui.addChild(computerGui);
+      break;
+  }
+  let [guiX, guiY, guiWidth, guiHeight] = calculateGuiProps(
+    gui.width,
+    gui.height
+  );
+  gui.x = guiX;
+  gui.y = guiY;
+  gui.width = guiWidth;
+  gui.height = guiHeight;
+  gui.visible = true;
+  stopPan = true;
+}
+
+function closeGui() {
+  setUnBusy();
+  gui.visible = false;
+  gui.removeChildren();
+  stopPan = false;
+  app.stage.off("pointerdown");
+}
+
+function calculateGuiProps(width, height) {
+  let guiX;
+  let guiY;
+  let guiWidth;
+  let guiHeight;
+  if (windowWidth * height > windowHeight * width) {
+    guiHeight = windowHeight * (1 - 2 * GUI_BORDER_PERCENTAGE);
+    guiY = windowHeight * GUI_BORDER_PERCENTAGE;
+    guiWidth = (width * guiHeight) / height;
+    guiX = windowWidth / 2 - guiWidth / 2;
+  } else {
+    guiWidth = windowWidth * (1 - 2 * GUI_BORDER_PERCENTAGE);
+    guiX = windowWidth * GUI_BORDER_PERCENTAGE;
+    guiHeight = (height * guiWidth) / width;
+    guiY = windowHeight / 2 - guiHeight / 2;
+  }
+  return [guiX, guiY, guiWidth, guiHeight];
+}
+
+function setBusy() {
+  busy = true;
+  tutorMaterials.cursor = "default";
+  tutorMaterials.interactive = false;
+  tutorMaterials.off("pointerdown");
+
+  resume.cursor = "default";
+  resume.interactive = false;
+  resume.off("pointerdown");
+
+  poster.cursor = "default";
+  poster.interactive = false;
+  poster.off("pointerdown");
+
+  computer.cursor = "default";
+  computer.interactive = false;
+  computer.off("pointerdown");
+
+  arrow.cursor = "default";
+  arrow.interactive = false;
+  arrow.off("pointerdown");
+}
+
+function setUnBusy() {
+  busy = false;
+  tutorMaterials.cursor = "pointer";
+  tutorMaterials.interactive = true;
+  tutorMaterials.on("pointerdown", function() {
+    if (!busy) {
+      getTutorMaterials();
+    }
+  });
+
+  resume.cursor = "pointer";
+  resume.interactive = true;
+  resume.on("pointerdown", function() {
+    if (!busy) {
+      openGui("resume");
+    }
+  });
+
+  poster.cursor = "pointer";
+  poster.interactive = true;
+  poster.on("pointerdown", function() {
+    if (!busy) {
+      openGui("poster");
+    }
+  });
+
+  computer.cursor = "pointer";
+  computer.interactive = true;
+  computer.on("pointerdown", function() {
+    if (!busy) {
+      openGui("computer");
+    }
+  });
+
+  arrow.cursor = "pointer";
+  arrow.interactive = true;
+  arrow.on("pointerdown", function() {
+    if (!busy) {
+      clickArrow();
+    }
+  });
+}
+
+function startScene2() {
+  busy = true;
+
+  blackScreen.style.display = "block";
+  blackScreen.style.opacity = 0;
+
+  fadeIn = true;
+  let fadeInInterval = setInterval(function() {
+    if (fadeIn) {
+      if (bgm.volume <= 0) {
+        bgm.stop();
+      }
+      if (blackScreen.style.opacity < 1) {
+        bgm.volume -= 0.08;
+        blackScreen.style.opacity = parseFloat(blackScreen.style.opacity) + 0.1;
+      } else {
+        clearInterval(fadeInInterval);
+        fadeIn = false;
+        bgm = resources["sound/girl.wav"].sound;
+        bgm.loop = true;
+        bgm.volume = 0.3;
+        // remove game objects
+        bg.removeChildren();
+        bgImg = new Sprite(resources["img/wealthyhouse.png"].texture);
+        bg.addChild(bgImg);
+        resize();
+        bg.x = -Math.abs(windowWidth - bg.width) / 2;
+        bg.y = -Math.abs(windowHeight - bg.height) / 2;
+        app.stage.removeChild(gui);
+        app.stage.removeChild(instructions);
+        // add all the game objects
+        // char = new Sprite(resources["img/girl.png"].texture);
+
+        openDialogue(function() {
+          currentDialogue = "scene2";
+          startDialogue();
+        });
+
+        // play music
+        setTimeout(function() {
+          bgm.play();
+          fadeOut = true;
+          let fadeOutInterval = setInterval(function() {
+            if (fadeOut) {
+              if (blackScreen.style.opacity > 0) {
+                blackScreen.style.opacity -= 0.1;
+              } else {
+                clearInterval(fadeOutInterval);
+                fadeOut = false;
+                blackScreen.style.display = "none";
+              }
+            }
+          }, 40);
+        }, 500);
+      }
+    }
+  }, 40);
 }
