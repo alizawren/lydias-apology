@@ -273,6 +273,13 @@ loader
   .add("img/lamponbutton.png")
   .add("img/witch.png")
   .add("img/witchbutton.png")
+  .add("img/radio.png")
+  .add("img/radiogui.png")
+  .add("img/radio1.png")
+  .add("img/radio2.png")
+  .add("img/radio3.png")
+  .add("img/radio4.png")
+  .add("img/radio5.png")
   .add("img/tdmancover.png")
   .add("img/slide11.png")
   .add("img/slide12.png")
@@ -293,8 +300,10 @@ loader
   .add("json/convos.json")
   // sound
   .add("sound/streets radiofied.wav")
-  .add("sound/basic radiofied.wav")
   .add("sound/hs radiofied.wav")
+  .add("sound/flightless bird radiofied.wav")
+  .add("sound/river ride radiofied.wav")
+  .add("sound/basic radiofied.wav")
   .on("progress", loadProgressHandler)
   .load(setup);
 
@@ -349,7 +358,7 @@ let room,
   tempLine;
 let chosenCards = [];
 let gui, phone, phoneGui, settingsButton;
-let bgm;
+let bgm1, bgm2, bgm3, bgm4, bgm5;
 let slide1drag = false;
 let slide2drag = false;
 let slide3drag = false;
@@ -373,8 +382,16 @@ function setup() {
   document.body.removeChild(loadingText);
   document.body.removeChild(littleBear);
 
-  bgm = resources["sound/streets radiofied.wav"].sound;
-  bgm.loop = true;
+  bgm1 = resources["sound/streets radiofied.wav"].sound;
+  bgm1.loop = true;
+  bgm2 = resources["sound/hs radiofied.wav"].sound;
+  bgm2.loop = true;
+  bgm3 = resources["sound/flightless bird radiofied.wav"].sound;
+  bgm3.loop = true;
+  bgm4 = resources["sound/river ride radiofied.wav"].sound;
+  bgm4.loop = true;
+  bgm5 = resources["sound/basic radiofied.wav"].sound;
+  bgm5.loop = true;
 
   room = new Container();
   room.x = 0;
@@ -445,18 +462,14 @@ function setup() {
     }
   });
 
-  radio = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  radio.x = 752;
-  radio.y = 720;
+  radio = new Sprite(resources["img/radio.png"].texture);
+  radio.x = 738;
+  radio.y = 636;
   radio.interactive = true;
   radio.cursor = "pointer";
   radio.on("pointerdown", function() {
     if (!busy) {
-      if (!bgm.isPlaying) {
-        bgm.play();
-      } else {
-        bgm.volume = 1 - bgm.volume;
-      }
+      openGui("radio");
     }
   });
 
@@ -1215,7 +1228,122 @@ function openGui(type) {
       let comicPage = new Sprite(resources["img/comicpage.png"].texture);
       gui.addChild(comicPage);
       break;
-
+    case "radio":
+      let rgui = new Container();
+      let radioGui = new Sprite(resources["img/radiogui.png"].texture);
+      let radio1 = new Sprite(resources["img/radio1.png"].texture);
+      radio1.x = 800;
+      radio1.y = 100;
+      radio1.interactive = true;
+      radio1.cursor = "pointer";
+      radio1.on("pointerdown", function() {
+        if (!bgm1.isPlaying) {
+          bgm1.play();
+          bgm1.volume = 1;
+          bgm2.volume = 0;
+          bgm3.volume = 0;
+          bgm4.volume = 0;
+          bgm5.volume = 0;
+        } else {
+          bgm1.volume = 1 - bgm1.volume;
+          bgm2.volume = 0;
+          bgm3.volume = 0;
+          bgm4.volume = 0;
+          bgm5.volume = 0;
+        }
+      });
+      let radio2 = new Sprite(resources["img/radio2.png"].texture);
+      radio2.x = 950;
+      radio2.y = 100;
+      radio2.interactive = true;
+      radio2.cursor = "pointer";
+      radio2.on("pointerdown", function() {
+        if (!bgm2.isPlaying) {
+          bgm2.play();
+          bgm2.volume = 1;
+          bgm1.volume = 0;
+          bgm3.volume = 0;
+          bgm4.volume = 0;
+          bgm5.volume = 0;
+        } else {
+          bgm1.volume = 0;
+          bgm2.volume = 1 - bgm2.volume;
+          bgm3.volume = 0;
+          bgm4.volume = 0;
+          bgm5.volume = 0;
+        }
+      });
+      let radio3 = new Sprite(resources["img/radio3.png"].texture);
+      radio3.x = 1100;
+      radio3.y = 100;
+      radio3.interactive = true;
+      radio3.cursor = "pointer";
+      radio3.on("pointerdown", function() {
+        if (!bgm3.isPlaying) {
+          bgm3.play();
+          bgm3.volume = 1;
+          bgm1.volume = 0;
+          bgm2.volume = 0;
+          bgm4.volume = 0;
+          bgm5.volume = 0;
+        } else {
+          bgm1.volume = 0;
+          bgm2.volume = 0;
+          bgm3.volume = 1 - bgm3.volume;
+          bgm4.volume = 0;
+          bgm5.volume = 0;
+        }
+      });
+      let radio4 = new Sprite(resources["img/radio4.png"].texture);
+      radio4.x = 1250;
+      radio4.y = 100;
+      radio4.interactive = true;
+      radio4.cursor = "pointer";
+      radio4.on("pointerdown", function() {
+        if (!bgm4.isPlaying) {
+          bgm4.play();
+          bgm4.volume = 1;
+          bgm1.volume = 0;
+          bgm2.volume = 0;
+          bgm3.volume = 0;
+          bgm5.volume = 0;
+        } else {
+          bgm1.volume = 0;
+          bgm2.volume = 0;
+          bgm3.volume = 0;
+          bgm4.volume = 1 - bgm4.volume;
+          bgm5.volume = 0;
+        }
+      });
+      let radio5 = new Sprite(resources["img/radio5.png"].texture);
+      radio5.x = 1400;
+      radio5.y = 100;
+      radio5.cursor = "pointer";
+      radio5.interactive = true;
+      radio5.on("pointerdown", function() {
+        if (!bgm5.isPlaying) {
+          bgm5.play();
+          bgm5.volume = 1;
+          bgm1.volume = 0;
+          bgm2.volume = 0;
+          bgm3.volume = 0;
+          bgm4.volume = 0;
+        } else {
+          bgm1.volume = 0;
+          bgm2.volume = 0;
+          bgm3.volume = 0;
+          bgm4.volume = 0;
+          bgm5.volume = 1 - bgm5.volume;
+        }
+      });
+      rgui.addChild(radioGui);
+      rgui.addChild(radio1);
+      rgui.addChild(radio2);
+      rgui.addChild(radio3);
+      rgui.addChild(radio4);
+      rgui.addChild(radio5);
+      gui.addChild(rgui);
+      break;
     case "witch":
       let witchGui = new Sprite(resources["img/witch.png"].texture);
       gui.addChild(witchGui);
