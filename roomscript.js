@@ -60,6 +60,35 @@ tdInput.addEventListener("keypress", function(event) {
 });
 document.body.appendChild(tdInput);
 
+let loopSlider = document.createElement("div");
+loopSlider.classList.add("swiper-container");
+loopSlider.style.background = "#eee"
+loopSlider.style.position = "absolute";
+loopSlider.style.zIndex = 100;
+loopSlider.style.borderRadius = "10px";
+loopSlider.style.display = "none";
+document.body.appendChild(loopSlider);
+
+let loopSliderInner = document.createElement("div");
+loopSliderInner.classList.add("swiper-wrapper");
+loopSlider.appendChild(loopSliderInner);
+
+let loopSliderGold = document.createElement("div");
+loopSliderGold.classList.add("loop-gold");
+loopSliderGold.style.position = "absolute";
+loopSliderGold.style.zIndex = 150;
+loopSliderGold.style.display = "none";
+document.body.appendChild(loopSliderGold);
+
+addAlphabet();
+
+var mySwiper = new Swiper('.swiper-container', {
+  loop: true,
+  slidesPerView: '7',
+  observer: true,
+  observeParents: true
+})
+
 let mb1Input = document.createElement("input");
 mb1Input.setAttribute("type", "text");
 mb1Input.style.position = "absolute";
@@ -161,7 +190,7 @@ PIXI.utils.sayHello(
   "Welcome friend! Not everything's as it seems. You are rendering: " + type
 );
 console.log(
-  "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, 🜅"
+  // "Forgive the above warnings; preloading sounds triggers the creation of AudioContexts, but it helps load sounds faster! Signed, 🜅"
 );
 
 //Aliases
@@ -214,8 +243,12 @@ loader
   .add("img/cardprinter1.png")
   .add("img/cardprinter2.png")
   .add("img/cardprinter3.png")
+  .add("img/printcard1.png")
+  .add("img/printcard2.png")
+  .add("img/printcard3.png")
+  .add("img/printcard4.png")
+  .add("img/cardsmall.png")
   // .add("img/stereogram.jpg")
-  .add("img/magic eye.png")
   .add("img/cpb.png")
   .add("img/cpbpressed.png")
   .add("img/symbol1.png")
@@ -241,6 +274,13 @@ loader
   .add("img/tdkp.png")
   .add("img/keypad.png")
   .add("img/tdman.png")
+  .add("img/magicbox.png")
+  .add("img/magicboxgui.png")
+  .add("img/redlight.png")
+  .add("img/greenlight.png")
+  .add("img/magic eye.png")
+  .add("img/looptool.png")
+  .add("img/looptoolgui.png")
   .add("img/tube11.png")
   .add("img/tube12.png")
   .add("img/tube13.png")
@@ -302,7 +342,7 @@ loader
   .add("sound/streets radiofied.wav")
   .add("sound/hs radiofied.wav")
   .add("sound/flightless bird radiofied.wav")
-  .add("sound/river ride radiofied.wav")
+  .add("sound/sino radiofied.wav")
   .add("sound/basic radiofied.wav")
   .on("progress", loadProgressHandler)
   .load(setup);
@@ -334,9 +374,14 @@ let room,
   tdkp,
   td,
   magicbox,
+  looptool,
+  light1, 
+  light2,
+  light3,
+  light4,
   witch,
   radio,
-  bookOfSymbols,
+  bookOfGoodInfo,
   binaryBook,
   comicBook,
   box,
@@ -388,7 +433,7 @@ function setup() {
   bgm2.loop = true;
   bgm3 = resources["sound/flightless bird radiofied.wav"].sound;
   bgm3.loop = true;
-  bgm4 = resources["sound/river ride radiofied.wav"].sound;
+  bgm4 = resources["sound/sino radiofied.wav"].sound;
   bgm4.loop = true;
   bgm5 = resources["sound/basic radiofied.wav"].sound;
   bgm5.loop = true;
@@ -440,9 +485,20 @@ function setup() {
     }
   });
 
-  magicbox = new Sprite(resources["img/aSimpleSquare.png"].texture);
-  magicbox.x = 160;
-  magicbox.y = 320;
+  looptool = new Sprite(resources["img/looptool.png"].texture)
+  looptool.x = 983;
+  looptool.y = 1021;
+  looptool.interactive = true;
+  looptool.cursor = "pointer";
+  looptool.on("pointerdown", function() {
+    if (!busy) {
+      openGui("lt")
+    }
+  });
+
+  magicbox = new Sprite(resources["img/magicbox.png"].texture);
+  magicbox.x = 100;
+  magicbox.y = 180;
   magicbox.interactive = true;
   magicbox.cursor = "pointer";
   magicbox.on("pointerdown", function() {
@@ -450,6 +506,19 @@ function setup() {
       openGui("mb");
     }
   });
+
+  light1 = new Sprite(resources["img/redlight.png"].texture);
+  light1.x = 100;
+  light1.y = 800;
+  light2 = new Sprite(resources["img/redlight.png"].texture);
+  light2.x = 300;
+  light2.y = 800;
+  light3 = new Sprite(resources["img/redlight.png"].texture);
+  light3.x = 500;
+  light3.y = 800;
+  light4 = new Sprite(resources["img/redlight.png"].texture);
+  light4.x = 700;
+  light4.y = 800;
 
   witch = new Sprite(resources["img/witchbutton.png"].texture);
   witch.x = 886;
@@ -474,8 +543,8 @@ function setup() {
   });
 
   binaryBook = new Sprite(resources["img/binarybook.png"].texture);
-  binaryBook.x = 937;
-  binaryBook.y = 379;
+  binaryBook.x = 912;
+  binaryBook.y = 378;
   binaryBook.interactive = true;
   binaryBook.cursor = "pointer";
   binaryBook.on("pointerdown", function() {
@@ -484,20 +553,20 @@ function setup() {
     }
   });
 
-  bookOfSymbols = new Sprite(resources["img/symbolsbook.png"].texture);
-  bookOfSymbols.x = 847;
-  bookOfSymbols.y = 360;
-  bookOfSymbols.interactive = true;
-  bookOfSymbols.cursor = "pointer";
-  bookOfSymbols.on("pointerdown", function() {
+  bookOfGoodInfo = new Sprite(resources["img/symbolsbook.png"].texture);
+  bookOfGoodInfo.x = 869;
+  bookOfGoodInfo.y = 367;
+  bookOfGoodInfo.interactive = true;
+  bookOfGoodInfo.cursor = "pointer";
+  bookOfGoodInfo.on("pointerdown", function() {
     if (!busy) {
       openGui("bos");
     }
   });
 
   comicBook = new Sprite(resources["img/comic.png"].texture);
-  comicBook.x = 810;
-  comicBook.y = 389;
+  comicBook.x = 843;
+  comicBook.y = 391;
   comicBook.interactive = true;
   comicBook.cursor = "pointer";
   comicBook.on("pointerdown", function() {
@@ -768,11 +837,12 @@ function setup() {
   room.addChild(td);
   room.addChild(tdkp);
   room.addChild(tdman);
+  room.addChild(looptool);
   room.addChild(magicbox);
   room.addChild(witch);
   room.addChild(radio);
   room.addChild(binaryBook);
-  room.addChild(bookOfSymbols);
+  room.addChild(bookOfGoodInfo);
   room.addChild(comicBook);
   room.addChild(box);
   room.addChild(tube1);
@@ -891,6 +961,35 @@ function setup() {
         openPhone("begin");
       } else if (data.lastMsgIndex < convo.length - 1) {
         openPhone();
+      }
+    },
+    error: function(xhr, errortype, exception) {
+      console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+    }
+  });
+  $.ajax("server/mb.php", {
+    contentType: "application/json",
+    dataType: "json",
+    success: function(data, status, xhr) {
+      if (data.slot1 === "true") {
+        light1 = new Sprite(resources["img/greenlight.png"].texture);
+        light1.x = 100;
+        light1.y = 800;
+      }
+      if (data.slot2 === "true") {
+        light2 = new Sprite(resources["img/greenlight.png"].texture);
+        light2.x = 300;
+        light2.y = 800;
+      }
+      if (data.slot3 === "true") {
+        light3 = new Sprite(resources["img/greenlight.png"].texture);
+        light3.x = 500;
+        light3.y = 800;
+      }
+      if (data.slot4 === "true") {
+        light4 = new Sprite(resources["img/greenlight.png"].texture);
+        light4.x = 700;
+        light4.y = 800;
       }
     },
     error: function(xhr, errortype, exception) {
@@ -1072,6 +1171,17 @@ function resize() {
   tdInput.style.height = `${gui.height * 0.05}px`;
   tdInput.style.fontSize = "24px";
 
+  loopSlider.style.left = `${gui.x + 0.256 * gui.width}px`;
+  loopSlider.style.top = `${gui.y + 0.228 * gui.height}px`;
+  loopSlider.style.width = `${gui.width * 0.484}px`;
+  loopSlider.style.height = `${gui.height * 0.122}px`;
+
+  let goldWidth = gui.width * 0.484 / 7;
+  loopSliderGold.style.width = `${goldWidth}px`;
+  loopSliderGold.style.height = `${gui.height * 0.122}px`;
+  loopSliderGold.style.left = `${gui.x + 0.256 * gui.width + goldWidth*3 - 5}px`
+  loopSliderGold.style.top = `${gui.y + 0.228 * gui.height - 5}px`;
+
   credits.style.left = `${gui.width * 0.78 + gui.x}px`;
   credits.style.top = `${gui.height * 0.15 + gui.y}px`;
   credits.style.width = `${gui.width * 0.2}px`;
@@ -1152,19 +1262,41 @@ function stagePointerUp(event) {
           if (data.flag === "true") {
             carddrag = false;
             // play a lil animation
-            setTimeout(function() {
-              card.visible = false;
-              td.off("pointerdown");
-              td.on("pointerdown", function() {
-                if (!busy) {
-                  // open a webpage related to the card dragged in
-                  window.open(data.realm);
-                }
-              });
-            }, 2000);
+            const feedCardTexture = [
+              resources["img/printcard4.png"].texture,
+              resources["img/printcard3.png"].texture,
+              resources["img/printcard2.png"].texture,
+              resources["img/printcard1.png"].texture
+            ];
+            let feedCardAnim = new AnimatedSprite(feedCardTexture);
+            feedCardAnim.x = 1270;
+            feedCardAnim.y = 495;
+            room.removeChild(card);
+            room.addChild(feedCardAnim);
+            feedCardAnim.gotoAndStop(0);
+            let animInterv = setInterval(function() {
+              if (feedCardAnim.currentFrame == 3) {
+                td.off("pointerdown");
+                td.on("pointerdown", function() {
+                  if (!busy) {
+                    // open a webpage related to the card dragged in
+                    // if final, change current page url
+                    // else, open a tab
+                    window.open(data.realm);
+                  }
+                });
+
+                room.removeChild(feedCardAnim);
+                clearInterval(animInterv);
+              } else {
+                feedCardAnim.gotoAndStop(feedCardAnim.currentFrame + 1);
+              }
+            }, 500);
+
+            setTimeout(function() {}, 2000);
           } else {
-            card.x = 1760;
-            card.y = 800;
+            card.x = 1720;
+            card.y = 750;
           }
         },
         error: function(xhr, errortype, exception) {
@@ -1173,8 +1305,8 @@ function stagePointerUp(event) {
       });
     } else {
       carddrag = false;
-      card.x = 1760;
-      card.y = 800;
+      card.x = 1720;
+      card.y = 750;
     }
   }
 
@@ -1211,11 +1343,37 @@ function openGui(type) {
       }
       app.stage.addChild(pen);
       break;
+    case "lt":
+      let loopToolGui = new Sprite(resources["img/looptoolgui.png"].texture)
+      gui.addChild(loopToolGui);
+      resize();
+      loopSlider.style.display = "block";
+      loopSliderGold.style.display = "block";
+      break;
     case "mb":
+      let magicBoxGui = new Sprite(resources["img/magicboxgui.png"].texture);
+      gui.addChild(magicBoxGui);
       mb1Input.style.display = "block";
       mb2Input.style.display = "block";
       mb3Input.style.display = "block";
       mb4Input.style.display = "block";
+      // light1 = new Sprite(resources["img/redlight.png"].texture);
+      // light1.x = 100;
+      // light1.y = 800;
+      // light2 = new Sprite(resources["img/redlight.png"].texture);
+      // light2.x = 300;
+      // light2.y = 800;
+      // light3 = new Sprite(resources["img/redlight.png"].texture);
+      // light3.x = 500;
+      // light3.y = 800;
+      // light4 = new Sprite(resources["img/redlight.png"].texture);
+      // light4.x = 700;
+      // light4.y = 800;
+      gui.addChild(light1);
+      gui.addChild(light2);
+      gui.addChild(light3);
+      gui.addChild(light4);
+      
       break;
     case "bos":
       break;
@@ -1528,7 +1686,8 @@ function closeGui() {
     inputs[i].value = "";
     inputs[i].style.display = "none";
   }
-
+  loopSlider.style.display = "none";
+  loopSliderGold.style.display = "none";
   credits.style.display = "none";
 }
 
@@ -1607,32 +1766,80 @@ function validateInput(type, input) {
       });
       break;
     case "mb1":
-      if (input == "1") {
-        console.log(input);
-      } else {
-      }
-      busy = false;
+      $.ajax("server/mb.php", {
+        data: {slot: 1, input: input},
+        contentType: "application/json",
+        dataType: "json",
+        success: function(data, status, xhr) {
+          if (data.slot1 === "true") {
+            gui.removeChild(light1);
+            light1 = new Sprite(resources["img/greenlight.png"].texture);
+            light1.x = 100;
+            light1.y = 800;
+            gui.addChild(light1)
+          }
+        },
+        error: function(xhr, errortype, exception) {
+          console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+        }
+      })
       break;
     case "mb2":
-      if (input == "1") {
-        console.log(input);
-      } else {
-      }
-      busy = false;
+        $.ajax("server/mb.php", {
+          data: {slot: 2, input: input},
+          contentType: "application/json",
+          dataType: "json",
+          success: function(data, status, xhr) {
+            if (data.slot2 === "true") {
+              gui.removeChild(light2);
+              light2 = new Sprite(resources["img/greenlight.png"].texture);
+              light2.x = 300;
+              light2.y = 800;
+              gui.addChild(light2)
+            }
+          },
+          error: function(xhr, errortype, exception) {
+            console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+          }
+        })
       break;
     case "mb3":
-      if (input == "1") {
-        console.log(input);
-      } else {
-      }
-      busy = false;
+        $.ajax("server/mb.php", {
+          data: {slot: 3, input: input},
+          contentType: "application/json",
+          dataType: "json",
+          success: function(data, status, xhr) {
+            if (data.slot3 === "true") {
+              gui.removeChild(light3);
+              light3 = new Sprite(resources["img/greenlight.png"].texture);
+              light3.x = 500;
+              light3.y = 800;
+              gui.addChild(light3)
+            }
+          },
+          error: function(xhr, errortype, exception) {
+            console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+          }
+        })
       break;
     case "mb4":
-      if (input == "1") {
-        console.log(input);
-      } else {
-      }
-      busy = false;
+        $.ajax("server/mb.php", {
+          data: {slot: 4, input: input},
+          contentType: "application/json",
+          dataType: "json",
+          success: function(data, status, xhr) {
+            if (data.slot4 === "true") {
+              gui.removeChild(light4);
+              light4 = new Sprite(resources["img/greenlight.png"].texture);
+              light4.x = 700;
+              light4.y = 800;
+              gui.addChild(light4)
+            }
+          },
+          error: function(xhr, errortype, exception) {
+            console.error("REQUEST UTTERLY FAILED!", errortype, exception);
+          }
+        })
       break;
   }
 }
@@ -1642,25 +1849,40 @@ function printCard(chosen) {
   room.removeChild(card);
   closeGui();
   // play animation
-  setTimeout(function() {
-    // add a card to scene
-    card = new Sprite(resources["img/aSimpleSquare.png"].texture);
-    card.chosenCards = chosen;
-    chosenCards = [];
-    card.x = 1760;
-    card.y = 800;
-    card.width = 20;
-    card.height = 30;
-    card.interactive = true;
-    card.cursor = "pointer";
-    card.on("pointerdown", function() {
-      if (!busy) {
-        carddrag = true;
-      }
-    });
-    room.addChild(card);
-    busy = false;
-  }, 2000);
+  const printCardTexture = [
+    resources["img/printcard1.png"].texture,
+    resources["img/printcard2.png"].texture,
+    resources["img/printcard3.png"].texture,
+    resources["img/printcard4.png"].texture
+  ];
+  let printCardAnim = new AnimatedSprite(printCardTexture);
+  printCardAnim.x = 1760;
+  printCardAnim.y = 780;
+  room.addChild(printCardAnim);
+  printCardAnim.gotoAndStop(0);
+  let animInterv = setInterval(function() {
+    if (printCardAnim.currentFrame == 3) {
+      // add a card to scene
+      card = new Sprite(resources["img/cardsmall.png"].texture);
+      card.chosenCards = chosen;
+      chosenCards = [];
+      card.x = 1720;
+      card.y = 750;
+      card.interactive = true;
+      card.cursor = "pointer";
+      card.on("pointerdown", function() {
+        if (!busy) {
+          carddrag = true;
+        }
+      });
+      room.addChild(card);
+      room.removeChild(printCardAnim);
+      busy = false;
+      clearInterval(animInterv);
+    } else {
+      printCardAnim.gotoAndStop(printCardAnim.currentFrame + 1);
+    }
+  }, 500);
 }
 
 function changeLight() {
@@ -1827,3 +2049,17 @@ document.addEventListener("keydown", function(key) {
     lines = [];
   }
 });
+
+function addAlphabet() {
+  for (let i = 65; i < 65+26; i++) {
+    let letter = String.fromCharCode(i);
+    let letterWrapper = document.createElement("div");
+    letterWrapper.classList.add("letter-wrapper");
+    letterWrapper.classList.add("swiper-slide")
+    let letterDiv = document.createElement("div");
+    letterDiv.classList.add("letter")
+    letterDiv.innerHTML = letter;
+    letterWrapper.appendChild(letterDiv)
+    loopSliderInner.appendChild(letterWrapper);
+  }
+}

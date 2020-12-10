@@ -374,10 +374,24 @@ function playGame() {
               snd = resources[data.sound].sound;
               snd.play();
             }
+            if (data.bgm) {
+              if (data.bgm === "none") {
+                bgm.stop();
+              }
+              else {
+                bgm.stop();
+                bgm = resources[data.bgm].sound;
+                bgm.loop = true;
+                bgm.volume = 0.3;
+                bgm.play();
+              }
+            }
             if (data.text.length > 0) {
-              if (data.char === "wren" || data.char === "none") {
+              if (data.char === "wren") {
                 char.texture = resources["img/wren sprite.png"].texture;
                 char.x = 200;
+              } else if (data.char === "none") {
+                char.texture = null;
               } else if (data.char.length > 0) {
                 char.texture = resources[`img/${data.char}.png`].texture;
                 char.x = windowWidth - 200 - char.width;
@@ -459,10 +473,24 @@ function advanceDialogue() {
         snd = resources[data.sound].sound;
         snd.play();
       }
+      if (data.bgm) {
+        if (data.bgm === "none") {
+          bgm.stop();
+        }
+        else {
+          bgm.stop();
+          bgm = resources[data.bgm].sound;
+          bgm.loop = true;
+          bgm.volume = 0.3;
+          bgm.play();
+        }
+      }
       if (data.text.length > 0) {
-        if (data.char === "wren" || data.char === "none") {
+        if (data.char === "wren") {
           char.texture = resources["img/wren sprite.png"].texture;
           char.x = 200;
+        } else if (data.char === "none") {
+          char.texture = null;
         } else if (data.char.length > 0) {
           char.texture = resources[`img/${data.char}.png`].texture;
           char.x = windowWidth - 200 - char.width;
@@ -754,9 +782,23 @@ function startDialogue() {
         snd = resources[data.sound].sound;
         snd.play();
       }
-      if (data.char === "wren" || data.char === "none") {
+      if (data.bgm) {
+        if (data.bgm === "none") {
+          bgm.stop();
+        }
+        else {
+          bgm.stop();
+          bgm = resources[data.bgm].sound;
+          bgm.loop = true;
+          bgm.volume = 0.3;
+          bgm.play();
+        }
+      }
+      if (data.char === "wren") {
         char.texture = resources["img/wren sprite.png"].texture;
         char.x = 200;
+      } else if (data.char === "none") {
+        char.texture = null;
       } else if (data.char.length > 0) {
         char.texture = resources[`img/${data.char}.png`].texture;
         char.x = windowWidth - 200 - char.width;
