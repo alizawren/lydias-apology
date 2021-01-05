@@ -1165,6 +1165,11 @@ function resize() {
   convoHolder.style.width = `${phoneGui.width - 20}px`;
   convoHolder.style.height = `${0.66 * phoneGui.height}px`;
 
+  let msgBubbles = document.getElementsByClassName("msg-bubble");
+  for (let msgBubble of msgBubbles) {
+    msgBubble.style.maxWidth = `${0.5 * phoneGui.width}px`;
+  }
+
   tdInput.style.left = `${gui.x + 0.11 * gui.width}px`;
   tdInput.style.top = `${gui.y + 0.28 * gui.height}px`;
   tdInput.style.width = `${gui.width * 0.78}px`;
@@ -2020,7 +2025,7 @@ function addMessageUi(msg) {
 
   let msgBubble = document.createElement("div");
   msgBubble.classList.add("msg-bubble");
-  msgBubble.style.padding = "5px";
+  msgBubble.style.padding = `0.6vh`;
   msgBubble.style.borderRadius = "5px";
   msgBubble.style.margin = "5px";
   msgBubble.style.maxWidth = `${0.5 * phoneGui.width}px`;
