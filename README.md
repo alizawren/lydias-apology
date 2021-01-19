@@ -12,6 +12,6 @@ Welcome. Not everything is as it seems.
 ![A framed photo and a letter](/preview3.PNG)
 
 # Hosted Live #
-See my work in progress here -> https://www.alizawren.com/room/index.html
+See my work in progress here -> https://www.alizawren.com/lydia/room.html
 
 Note to self: clean up memory leaks/optimize
