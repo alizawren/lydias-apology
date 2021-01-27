@@ -13,5 +13,3 @@ Welcome. Not everything is as it seems.
 
 # Hosted Live #
 See my work in progress here -> https://www.alizawren.com/lydia/room.html
-
-Note to self: clean up memory leaks/optimize
